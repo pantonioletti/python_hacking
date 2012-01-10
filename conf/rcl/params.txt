@@ -1,0 +1,5 @@
+C:\\dev\\projects\\ScriptsUtil\\data\\ITEMS.csv
+C:\\dev\\projects\\ScriptsUtil\\data\\rcl_format.ini
+C:\\dev\\projects\\ScriptsUtil\\data\\RCL_AREA.csv
+C:\\dev\\projects\\ScriptsUtil\\data\\RCL_eerr.csv
+C:\\dev\\projects\\ScriptsUtil\\data\\

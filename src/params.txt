@@ -1,0 +1,33 @@
+#REN_MAS
+#C:\dev\projects\ScriptsUtil\data\input\forecast_files.txt
+#ORG_API
+#organization hierarchy
+#C:\dev\projects\ScriptsUtil\data\input\falabella_co\org_model.txt
+#positions
+#C:\dev\projects\ScriptsUtil\data\input\falabella_co\org_positions.txt
+#Date to apply
+#01/01/2006
+#Unit or level
+#LOC
+#EQUATIONS
+#C:\dev\projects\ScriptsUtil\data\input\falabella_co\equations.txt
+#FORCAST_PARAM
+#C:\dev\projects\ScriptsUtil\data\input\falabella_co\forecast_parameters.txt
+#ORG_PARAM
+#C:\dev\projects\ScriptsUtil\data\input\falabella_co\organization_parameters.txt
+############################################################################
+#FORECAST
+#C:\dev\projects\ScriptsUtil\data\input\falabella_co\forecast_definition.txt
+############################################################################
+#LOAD_ACT
+#N
+#C:\dev\projects\ScriptsUtil\data\input\falabella_co\activities_load.txt
+#C:\dev\projects\ScriptsUtil\data\output\falabella_co\
+#WFMFALA_CO
+#CPYTHON
+#NEW_LINE
+#strs.txt
+#C:\dev\projects\WFM\paso\
+#C:\dev\projects\WFM\
+#</si>
+EXCEL

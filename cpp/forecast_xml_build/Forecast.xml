@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="ISO_8859-1"?>
+<!DOCTYPE root SYSTEM "Forecast.dtd">
+<root>
+<definition id="1" displayName="15MIN" initDaysPrior="7" timeIncrement="15" >
+    <defElement elementID="1" initValueType="&INIT_TYPE_TREND;" rank="1" >
+        <projection linkedProjElemID="1" linkedProjTimeFrame="&LINK_TIME_FRAME_DAY;" lockedToProj="N" />
+        <linkedElement elementID="50" linkPercent="100" />
+        <linkedElement elementID="51" linkPercent="100" />
+        <linkedElement elementID="52" linkPercent="100" />
+        <linkedElement elementID="53" linkPercent="100" />
+        <linkedElement elementID="54" linkPercent="100" />
+        <linkedElement elementID="55" linkPercent="100" />
+        <linkedElement elementID="57" linkPercent="100" />
+        <linkedElement elementID="58" linkPercent="100" />
+        <elementGroup groupID="1" rank="1" />
+    </defElement>
+    <defElement elementID="50" initValueType="&INIT_TYPE_PATTERN;" rank="2" >
+        <elementGroup groupID="1" rank="1" />
+    </defElement>
+    <defElement elementID="51" initValueType="&INIT_TYPE_PATTERN;" rank="3" >
+        <elementGroup groupID="1" rank="1" />
+    </defElement>
+    <defElement elementID="52" initValueType="&INIT_TYPE_PATTERN;" rank="4" >
+        <elementGroup groupID="1" rank="1" />
+    </defElement>
+    <defElement elementID="53" initValueType="&INIT_TYPE_PATTERN;" rank="5" >
+        <elementGroup groupID="1" rank="1" />
+    </defElement>
+    <defElement elementID="54" initValueType="&INIT_TYPE_PATTERN;" rank="6" >
+        <elementGroup groupID="1" rank="1" />
+    </defElement>
+    <defElement elementID="55" initValueType="&INIT_TYPE_PATTERN;" rank="7" >
+        <elementGroup groupID="50" rank="1" />
+        <elementGroup groupID="51" rank="2" />
+        <elementGroup groupID="52" rank="3" />
+        <elementGroup groupID="53" rank="4" />
+        <elementGroup groupID="54" rank="5" />
+        <elementGroup groupID="55" rank="6" />
+        <elementGroup groupID="56" rank="7" />
+        <elementGroup groupID="57" rank="8" />
+        <elementGroup groupID="58" rank="9" />
+        <elementGroup groupID="59" rank="10" />
+        <elementGroup groupID="60" rank="11" />
+        <elementGroup groupID="61" rank="12" />
+        <elementGroup groupID="62" rank="13" />
+        <elementGroup groupID="63" rank="14" />
+        <elementGroup groupID="64" rank="15" />
+        <elementGroup groupID="65" rank="16" />
+        <elementGroup groupID="66" rank="17" />
+        <elementGroup groupID="67" rank="18" />
+        <elementGroup groupID="68" rank="19" />
+        <elementGroup groupID="69" rank="20" />
+        <elementGroup groupID="70" rank="21" />
+        <elementGroup groupID="71" rank="22" />
+        <elementGroup groupID="72" rank="23" />
+        <elementGroup groupID="73" rank="24" />
+        <elementGroup groupID="74" rank="25" />
+        <elementGroup groupID="75" rank="26" />
+        <elementGroup groupID="76" rank="27" />
+        <elementGroup groupID="77" rank="28" />
+        <elementGroup groupID="78" rank="29" />
+        <elementGroup groupID="79" rank="30" />
+        <elementGroup groupID="80" rank="31" />
+        <elementGroup groupID="81" rank="32" />
+        <elementGroup groupID="82" rank="33" />
+        <elementGroup groupID="83" rank="34" />
+        <elementGroup groupID="84" rank="35" />
+        <elementGroup groupID="85" rank="36" />
+        <elementGroup groupID="86" rank="37" />
+        <elementGroup groupID="87" rank="38" />
+        <elementGroup groupID="88" rank="39" />
+        <elementGroup groupID="89" rank="40" />
+        <elementGroup groupID="90" rank="41" />
+        <elementGroup groupID="91" rank="42" />
+        <elementGroup groupID="92" rank="43" />
+        <elementGroup groupID="93" rank="44" />
+        <elementGroup groupID="94" rank="45" />
+        <elementGroup groupID="95" rank="46" />
+        <elementGroup groupID="96" rank="47" />
+        <elementGroup groupID="97" rank="48" />
+        <elementGroup groupID="98" rank="49" />
+        <elementGroup groupID="99" rank="50" />
+        <elementGroup groupID="100" rank="51" />
+        <elementGroup groupID="101" rank="52" />
+        <elementGroup groupID="102" rank="53" />
+        <elementGroup groupID="103" rank="54" />
+        <elementGroup groupID="104" rank="55" />
+        <elementGroup groupID="105" rank="56" />
+        <elementGroup groupID="106" rank="57" />
+        <elementGroup groupID="107" rank="58" />
+        <elementGroup groupID="108" rank="59" />
+        <elementGroup groupID="109" rank="60" />
+        <elementGroup groupID="110" rank="61" />
+        <elementGroup groupID="111" rank="62" />
+        <elementGroup groupID="112" rank="63" />
+        <elementGroup groupID="113" rank="64" />
+        <elementGroup groupID="114" rank="65" />
+        <elementGroup groupID="115" rank="66" />
+        <elementGroup groupID="116" rank="67" />
+        <elementGroup groupID="117" rank="68" />
+        <elementGroup groupID="118" rank="69" />
+        <elementGroup groupID="119" rank="70" />
+        <elementGroup groupID="120" rank="71" />
+        <elementGroup groupID="121" rank="72" />
+        <elementGroup groupID="122" rank="73" />
+        <elementGroup groupID="123" rank="74" />
+        <elementGroup groupID="124" rank="75" />
+        <elementGroup groupID="125" rank="76" />
+        <elementGroup groupID="126" rank="77" />
+        <elementGroup groupID="127" rank="78" />
+        <elementGroup groupID="128" rank="79" />
+        <elementGroup groupID="129" rank="80" />
+        <elementGroup groupID="130" rank="81" />
+        <elementGroup groupID="131" rank="82" />
+        <elementGroup groupID="132" rank="83" />
+        <elementGroup groupID="133" rank="84" />
+        <elementGroup groupID="134" rank="85" />
+        <elementGroup groupID="135" rank="86" />
+        <elementGroup groupID="136" rank="87" />
+        <elementGroup groupID="137" rank="88" />
+        <elementGroup groupID="138" rank="89" />
+    </defElement>
+    <defElement elementID="57" initValueType="&INIT_TYPE_PATTERN;" rank="8" >
+        <elementGroup groupID="1" rank="1" />
+    </defElement>
+    <defElement elementID="58" initValueType="&INIT_TYPE_PATTERN;" rank="9" >
+        <elementGroup groupID="50" rank="1" />
+        <elementGroup groupID="51" rank="2" />
+        <elementGroup groupID="52" rank="3" />
+        <elementGroup groupID="53" rank="4" />
+        <elementGroup groupID="54" rank="5" />
+        <elementGroup groupID="55" rank="6" />
+        <elementGroup groupID="56" rank="7" />
+        <elementGroup groupID="57" rank="8" />
+        <elementGroup groupID="58" rank="9" />
+        <elementGroup groupID="59" rank="10" />
+        <elementGroup groupID="60" rank="11" />
+        <elementGroup groupID="61" rank="12" />
+        <elementGroup groupID="62" rank="13" />
+        <elementGroup groupID="63" rank="14" />
+        <elementGroup groupID="64" rank="15" />
+        <elementGroup groupID="65" rank="16" />
+        <elementGroup groupID="66" rank="17" />
+        <elementGroup groupID="67" rank="18" />
+        <elementGroup groupID="68" rank="19" />
+        <elementGroup groupID="69" rank="20" />
+        <elementGroup groupID="70" rank="21" />
+        <elementGroup groupID="71" rank="22" />
+        <elementGroup groupID="72" rank="23" />
+        <elementGroup groupID="73" rank="24" />
+        <elementGroup groupID="74" rank="25" />
+        <elementGroup groupID="75" rank="26" />
+        <elementGroup groupID="76" rank="27" />
+        <elementGroup groupID="77" rank="28" />
+        <elementGroup groupID="78" rank="29" />
+        <elementGroup groupID="79" rank="30" />
+        <elementGroup groupID="80" rank="31" />
+        <elementGroup groupID="81" rank="32" />
+        <elementGroup groupID="82" rank="33" />
+        <elementGroup groupID="83" rank="34" />
+        <elementGroup groupID="84" rank="35" />
+        <elementGroup groupID="85" rank="36" />
+        <elementGroup groupID="86" rank="37" />
+        <elementGroup groupID="87" rank="38" />
+        <elementGroup groupID="88" rank="39" />
+        <elementGroup groupID="89" rank="40" />
+        <elementGroup groupID="90" rank="41" />
+        <elementGroup groupID="91" rank="42" />
+        <elementGroup groupID="92" rank="43" />
+        <elementGroup groupID="93" rank="44" />
+        <elementGroup groupID="94" rank="45" />
+        <elementGroup groupID="95" rank="46" />
+        <elementGroup groupID="96" rank="47" />
+        <elementGroup groupID="97" rank="48" />
+        <elementGroup groupID="98" rank="49" />
+        <elementGroup groupID="99" rank="50" />
+        <elementGroup groupID="100" rank="51" />
+        <elementGroup groupID="101" rank="52" />
+        <elementGroup groupID="102" rank="53" />
+        <elementGroup groupID="103" rank="54" />
+        <elementGroup groupID="104" rank="55" />
+        <elementGroup groupID="105" rank="56" />
+        <elementGroup groupID="106" rank="57" />
+        <elementGroup groupID="107" rank="58" />
+        <elementGroup groupID="108" rank="59" />
+        <elementGroup groupID="109" rank="60" />
+        <elementGroup groupID="110" rank="61" />
+        <elementGroup groupID="111" rank="62" />
+        <elementGroup groupID="112" rank="63" />
+        <elementGroup groupID="113" rank="64" />
+        <elementGroup groupID="114" rank="65" />
+        <elementGroup groupID="115" rank="66" />
+        <elementGroup groupID="116" rank="67" />
+        <elementGroup groupID="117" rank="68" />
+        <elementGroup groupID="118" rank="69" />
+        <elementGroup groupID="119" rank="70" />
+        <elementGroup groupID="120" rank="71" />
+        <elementGroup groupID="121" rank="72" />
+        <elementGroup groupID="122" rank="73" />
+        <elementGroup groupID="123" rank="74" />
+        <elementGroup groupID="124" rank="75" />
+        <elementGroup groupID="125" rank="76" />
+        <elementGroup groupID="126" rank="77" />
+        <elementGroup groupID="127" rank="78" />
+        <elementGroup groupID="128" rank="79" />
+        <elementGroup groupID="129" rank="80" />
+        <elementGroup groupID="130" rank="81" />
+        <elementGroup groupID="131" rank="82" />
+        <elementGroup groupID="132" rank="83" />
+        <elementGroup groupID="133" rank="84" />
+        <elementGroup groupID="134" rank="85" />
+        <elementGroup groupID="135" rank="86" />
+        <elementGroup groupID="136" rank="87" />
+        <elementGroup groupID="137" rank="88" />
+        <elementGroup groupID="138" rank="89" />
+    </defElement>
+    <patterns maxWeeks="13" historyPeriods="24" precision="2" > 
+        <pattern_type id="&PATTERN_TYPE_LAST_X_WEEKS;" default_weeks="3" init_selected="N" />
+        <pattern_type id="&PATTERN_TYPE_SAME_WEEK_LAST_X_YEARS;" default_years="1" init_selected="Y" />
+        <pattern_type id="&PATTERN_TYPE_WPY;" default_weeks="1" default_periods="3" default_years="1" init_selected="N" />
+    </patterns>
+    <trending maxWeeks="13" historyPeriods="24" precision="2" >
+        <pattern_type id="&PATTERN_TYPE_LAST_X_WEEKS;" default_weeks="5" init_selected="N" />
+        <pattern_type id="&PATTERN_TYPE_SAME_WEEK_LAST_X_YEARS;" default_years="1" init_selected="Y" />
+        <pattern_type id="&PATTERN_TYPE_WPY;" default_weeks="2" default_periods="3" default_years="1" init_selected="N" />
+    </trending>
+    <applies-to >
+        <org level="1" applicable="Y" />
+    </applies-to>
+</definition>
+<definition id="2" displayName="24HRS" initDaysPrior="7" timeIncrement="1440" >
+    <defElement elementID="1" initValueType="&INIT_TYPE_TREND;" rank="1" >
+        <projection linkedProjElemID="1" linkedProjTimeFrame="&LINK_TIME_FRAME_DAY;" lockedToProj="N" />
+        <linkedElement elementID="56" linkPercent="100" />
+        <linkedElement elementID="58" linkPercent="100" />
+        <linkedElement elementID="59" linkPercent="100" />
+        <elementGroup groupID="1" rank="1" />
+    </defElement>
+    <defElement elementID="56" initValueType="&INIT_TYPE_PATTERN;" rank="2" >
+        <elementGroup groupID="1" rank="1" />
+    </defElement>
+    <defElement elementID="58" initValueType="&INIT_TYPE_PATTERN;" rank="3" >
+        <elementGroup groupID="1" rank="1" />
+    </defElement>
+    <defElement elementID="59" initValueType="&INIT_TYPE_PATTERN;" rank="4" >
+        <elementGroup groupID="1" rank="1" />
+    </defElement>
+    <patterns maxWeeks="13" historyPeriods="24" precision="2" >        
+        <pattern_type id="&PATTERN_TYPE_LAST_X_WEEKS;" default_weeks="3" init_selected="N" />
+        <pattern_type id="&PATTERN_TYPE_SAME_WEEK_LAST_X_YEARS;" default_years="1" init_selected="Y" />
+        <pattern_type id="&PATTERN_TYPE_WPY;" default_weeks="1" default_periods="3" default_years="1" init_selected="N" />
+    </patterns>
+    <trending maxWeeks="13" historyPeriods="24" precision="2" >
+        <pattern_type id="&PATTERN_TYPE_LAST_X_WEEKS;" default_weeks="5" init_selected="N" />
+        <pattern_type id="&PATTERN_TYPE_SAME_WEEK_LAST_X_YEARS;" default_years="1" init_selected="Y" />
+        <pattern_type id="&PATTERN_TYPE_WPY;" default_weeks="2" default_periods="3" default_years="1" init_selected="N" />
+    </trending>
+    <applies-to >
+        <org level="1" applicable="Y" />
+    </applies-to>
+</definition>
+
+<element id="1" displayName="Ventas" defaultFormat="$###,###"  />
+<element id="50" code="Totuncam" displayName="Total Un-.idades Cambiadas" defaultFormat="###,###" />
+<element id="51" code="Trxava" displayName="Total Transacciones Avance Efectivo" defaultFormat="###,###" />
+<element id="52" code="Trxrec" displayName="Total transacciones recaudacion" defaultFormat="###,###" />
+<element id="53" code="Trxsup" displayName="Total transacciones Super Avance" defaultFormat="###,###" />
+<element id="54" code="Ttrxtda" displayName="Total Transacciones Tda" defaultFormat="###,###" />
+<element id="55" code="Uncr" displayName="Unidades Notas de Credito" defaultFormat="###,###" />
+<element id="56" code="Unidtrf" displayName="Unidades de transferencias de CD a Tienda" defaultFormat="###,###" />
+<element id="57" code="Utrxpacou" displayName="Unid pagos de cuotas recibidas en la tienda" defaultFormat="###,###" />
+<element id="58" code="Uvta" displayName="Unidades Vendidas" defaultFormat="###,###" />
+<element id="59" code="unidev" displayName="Unidades devueltas de la tienda al CD" defaultFormat="###,###" />
+<group id="1" code="Default" displayName="Default" defaultGroup="Y"  />
+<group id="50" code="D101" displayName="ACCESORIOS" defaultGroup="N" />
+<group id="51" code="D102" displayName="ALFOMBRA" defaultGroup="N" />
+<group id="52" code="D103" displayName="AUDIO" defaultGroup="N" />
+<group id="53" code="D104" displayName="BANO" defaultGroup="N" />
+<group id="54" code="D105" displayName="BOUTIQUES MUJER" defaultGroup="N" />
+<group id="55" code="D107" displayName="CALZADO ESCOLAR" defaultGroup="N" />
+<group id="56" code="D110" displayName="CAMA" defaultGroup="N" />
+<group id="57" code="D111" displayName="COLCHONERIA" defaultGroup="N" />
+<group id="58" code="D113" displayName="COMPUTACION" defaultGroup="N" />
+<group id="59" code="D115" displayName="CORSETERIA" defaultGroup="N" />
+<group id="60" code="D117" displayName="CUEROS" defaultGroup="N" />
+<group id="61" code="D118" displayName="CUEROS MUJER" defaultGroup="N" />
+<group id="62" code="D120" displayName="DECORACION FINA" defaultGroup="N" />
+<group id="63" code="D121" displayName="DENIM MUJER" defaultGroup="N" />
+<group id="64" code="D122" displayName="ELECTRODOMESTICOS" defaultGroup="N" />
+<group id="65" code="D123" displayName="ELECTRONICA MENOR" defaultGroup="N" />
+<group id="66" code="D124" displayName="ESCOLAR" defaultGroup="N" />
+<group id="67" code="D125" displayName="FORMAL MUJER" defaultGroup="N" />
+<group id="68" code="D126" displayName="FOTOGRAFIA" defaultGroup="N" />
+<group id="69" code="D127" displayName="GOURMET" defaultGroup="N" />
+<group id="70" code="D129" displayName="MUNDO JOVEN MUJER" defaultGroup="N" />
+<group id="71" code="D130" displayName="INSTRUMENTOS MUSICALES" defaultGroup="N" />
+<group id="72" code="D131" displayName="JEANS" defaultGroup="N" />
+<group id="73" code="D132" displayName="JUVENIL MUJER" defaultGroup="N" />
+<group id="74" code="D134" displayName="LENCERIA" defaultGroup="N" />
+<group id="75" code="D136" displayName="LINEA BLANCA" defaultGroup="N" />
+<group id="76" code="D137" displayName="LOLAS" defaultGroup="N" />
+<group id="77" code="D138" displayName="LOLOS" defaultGroup="N" />
+<group id="78" code="D139" displayName="MALETERIA" defaultGroup="N" />
+<group id="79" code="D141" displayName="MARQUIS MUJER" defaultGroup="N" />
+<group id="80" code="D143" displayName="MAS SPORT" defaultGroup="N" />
+<group id="81" code="D145" displayName="MENAJE COCINA" defaultGroup="N" />
+<group id="82" code="D146" displayName="MENAJE FINO" defaultGroup="N" />
+<group id="83" code="D147" displayName="MENAJE MESA" defaultGroup="N" />
+<group id="84" code="D149" displayName="MUEBLERIA" defaultGroup="N" />
+<group id="85" code="D150" displayName="MUSICA Y ENTRETENIMIENTO" defaultGroup="N" />
+<group id="86" code="D151" displayName="NAVIDAD" defaultGroup="N" />
+<group id="87" code="D152" displayName="NINA" defaultGroup="N" />
+<group id="88" code="D153" displayName="NINO" defaultGroup="N" />
+<group id="89" code="D159" displayName="REGATTA MUJER" defaultGroup="N" />
+<group id="90" code="D160" displayName="RELOJERIA" defaultGroup="N" />
+<group id="91" code="D161" displayName="RODADOS" defaultGroup="N" />
+<group id="92" code="D162" displayName="ROPA INT NINOS" defaultGroup="N" />
+<group id="93" code="D163" displayName="ROPA INTERIOR" defaultGroup="N" />
+<group id="94" code="D166" displayName="SPORT MUJER" defaultGroup="N" />
+<group id="95" code="D168" displayName="REVESTIMIENTOS Y CORTINAJES" defaultGroup="N" />
+<group id="96" code="D170" displayName="TIEMPO LIBRE" defaultGroup="N" />
+<group id="97" code="D171" displayName="TV-VIDEO" defaultGroup="N" />
+<group id="98" code="D172" displayName="VIDEOJUEGOS" defaultGroup="N" />
+<group id="99" code="D175" displayName="JUGUETERIA" defaultGroup="N" />
+<group id="100" code="D180" displayName="BOUTIQUES NINOS" defaultGroup="N" />
+<group id="101" code="D185" displayName="RADIO SHACK" defaultGroup="N" />
+<group id="102" code="D189" displayName="MARCAS JUVENIL" defaultGroup="N" />
+<group id="103" code="D190" displayName="MARCAS SPORT" defaultGroup="N" />
+<group id="104" code="D191" displayName="TELEFONIA MOVIL" defaultGroup="N" />
+<group id="105" code="D192" displayName="BICICLETAS Y MAQUINAS" defaultGroup="N" />
+<group id="106" code="D200" displayName="CUIDADO PERSONAL" defaultGroup="N" />
+<group id="107" code="D201" displayName="OPTICA" defaultGroup="N" />
+<group id="108" code="D300" displayName="BEBES NINA" defaultGroup="N" />
+<group id="109" code="D301" displayName="BEBES NINO" defaultGroup="N" />
+<group id="110" code="D302" displayName="MARCAS JUVENIL HOMBRE" defaultGroup="N" />
+<group id="111" code="D303" displayName="MARQUIS-REGATTA HOMBRE" defaultGroup="N" />
+<group id="112" code="D304" displayName="MARCAS SPORT HOMBRE" defaultGroup="N" />
+<group id="113" code="D305" displayName="CAMISERIA MAS" defaultGroup="N" />
+<group id="114" code="D306" displayName="CAMISERIA MARCA" defaultGroup="N" />
+<group id="115" code="D307" displayName="INDEX HOMBRE" defaultGroup="N" />
+<group id="116" code="D308" displayName="CALZADO MUJER MAS" defaultGroup="N" />
+<group id="117" code="D309" displayName="CALZADO MUJER MARCA" defaultGroup="N" />
+<group id="118" code="D310" displayName="CALZADO HOMBRE MAS" defaultGroup="N" />
+<group id="119" code="D311" displayName="CALZADO HOMBRE MARCAS" defaultGroup="N" />
+<group id="120" code="D312" displayName="CALZADO JUVENIL MARCAS" defaultGroup="N" />
+<group id="121" code="D313" displayName="CALZADO JUVENIL MAS" defaultGroup="N" />
+<group id="122" code="D314" displayName="TEXTIL MAS" defaultGroup="N" />
+<group id="123" code="D315" displayName="TEXTIL MARCAS" defaultGroup="N" />
+<group id="124" code="D317" displayName="ZAPATILLAS MARCA" defaultGroup="N" />
+<group id="125" code="D318" displayName="SASTRERIA MAS" defaultGroup="N" />
+<group id="126" code="D319" displayName="SASTRERIA MARCAS" defaultGroup="N" />
+<group id="127" code="D320" displayName="CACHAREL" defaultGroup="N" />
+<group id="128" code="D321" displayName="TATIENNE" defaultGroup="N" />
+<group id="129" code="D323" displayName="PEPE JEANS" defaultGroup="N" />
+<group id="130" code="D324" displayName="PEPE JEANS MUJER" defaultGroup="N" />
+<group id="131" code="D327" displayName="PERFUMERIA SELECTIVA" defaultGroup="N" />
+<group id="132" code="D328" displayName="PERFUMERIA SEMI-SELECTIVA" defaultGroup="N" />
+<group id="133" code="D330" displayName="BARBADOS MUJER" defaultGroup="N" />
+<group id="134" code="D331" displayName="ROPA INTERIOR ESCOLAR" defaultGroup="N" />
+<group id="135" code="D334" displayName="TED LAPIDUS MUJER" defaultGroup="N" />
+<group id="136" code="D335" displayName="ROBERT LEWIS SPORT" defaultGroup="N" />
+<group id="137" code="D336" displayName="ROBERT LEWIS JUVENIL" defaultGroup="N" />
+<group id="138" code="D340" displayName="MOCHILAS ESCOLARES" defaultGroup="N" />
+</root>
