@@ -13,6 +13,7 @@
 *.bak
 *.class
 *.log
+*__pycache__
 src/*.gitignore
 /emp.xml
 /multiweek.txt
