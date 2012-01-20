@@ -12,6 +12,7 @@
 *.pydevproject
 *.bak
 *.class
+*.log
 src/*.gitignore
 /emp.xml
 /multiweek.txt
