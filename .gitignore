@@ -10,6 +10,9 @@
 *.7z
 *.project
 *.pydevproject
+*.bak
+*.class
+src/*.gitignore
 /emp.xml
 /multiweek.txt
 /pos_trujillo.txt
@@ -18,3 +21,12 @@ src/exec.py.bak
 cpp/a.exe
 .spyderproject
 src/config.zip
+src/dbaccess/.gitignore
+src/file/.gitignore
+src/pmm/__init__.py.bak
+src/pmm/pmmentities.py.bak
+src/reports/.gitignore
+src/test/__init__.py.bak
+src/test/accesspmm.py.bak
+src/util/readusitem.py.bak
+.gitignore
