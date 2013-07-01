@@ -77,6 +77,8 @@ class LibroMayor(App):
         #line 4 estado resultado file
         s = self.params_fd.readline().replace('\n','')
         self.eerr = load_eerr_file(s)
+        #line 5 root dir
+        #self.rootdir = self.params_fd.readline().replace('\n','')
 
     def load_libro_mayor(self, in_file, out_file):
         f_stat = os.stat(in_file)
@@ -211,7 +213,10 @@ def load_item_file(file):
             #logging.debug(row)
     fd.close()
     return item_cod_desc
-
+'''
+Load a file which map an area code with a brand
+and a company group
+'''
 def load_area_file(file):
     logging.debug("Loading Area file")
     fd=open(file, 'r', newline='')
@@ -223,6 +228,10 @@ def load_area_file(file):
     fd.close()
     return area_cod_desc
 
+'''
+Load a file which map a profit and loss report code prefix 
+with its description  
+'''
 def load_eerr_file(file):
     logging.debug("Loading EERR file")
     fd=open(file, 'r', newline='')

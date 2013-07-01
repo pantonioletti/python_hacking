@@ -4,7 +4,7 @@ Created on 14/11/2011
 @author: pantonio
 '''
 from easygui import fileopenbox
-import sys
+#import sys
 
 def get_file_name():        
     default='C:\dev\projects\ScriptsUtil\data\*.csv'
