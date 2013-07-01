@@ -1,3 +1,5 @@
+#coding=ISO_8859-1
+#UTF-8
 import cx_Oracle
 
 class RowIterator:
@@ -83,12 +85,13 @@ def getConnection(connType, target):
             user="ewmuser"
             passwd="ewmuser"
             conn_str="wfmfala"
-        elif target == "WFMFALA_CO":
+        elif target == "WFMFALAPE":
             user="ewmuser"
             passwd="ewmuser"
-            conn_str="wfmfala_co"
+            conn_str="wfmfalape"
         else:
             print("DB connection target should be one of: ")
+            print("    WFMFALAPE    | ")
             print("    WFMFALA_PROD | ")
             print("    WFMFALA_TEST | ")
             print("    WFMFALA")
