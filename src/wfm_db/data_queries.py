@@ -1,3 +1,5 @@
+#coding=ISO_8859-1
+#UTF-8
 '''
 Created on Nov 23, 2010
 
