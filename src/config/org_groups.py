@@ -31,6 +31,35 @@ def load_attr12_db(conn):
     return attr_12
     
 
+def load_empty_org_groups(orgs):
+    try:
+        fd = open(orgs,'r')
+        str = fd.readline()
+        org_grps = dict()
+        
+        # 0: org group cd
+        # 1: org group name
+        # 2: org_level
+        while(len(str) != 0):
+            str = str.replace('\n', '')
+            vals = str.rsplit(';')
+            org_grps[vals[0]]=(vals[1], vals[2])
+            str = fd.readline()
+        fd.close()
+        org_grp_id = 2
+        for grp in org_grps.keys():
+            
+            sql = "insert into org_group (ORG_GROUP_ID,ORG_GROUP_CD,ORG_GROUP_NAME,ORG_GROUP_DEF,AUDIT_DATE,AUDIT_EMP_ID) "
+            sql += "values (" + org_grp_id.__str__()+" ,'" + grp + "', '" + org_grps[grp][0] + "','<OGD><ACT>Y</ACT><INACT>N</INACT><FIL><TYPE>1</TYPE></FIL><SEL><TYPE>2</TYPE><OL>"
+            sql += org_grps[grp][1].__str__() + "</OL><RE>Y</RE><ATT><AID>12</AID><AO>EQ</AO><AV>"
+            sql += org_grps[grp][1] + "</AV><AD>1</AD></ATT></SEL></OGD>',"
+            sql += "to_date('1/1/2010','mm/dd/yyyy'),1);\n"
+            org_grp_id += 1
+            print(sql)
+            #print(grp + ';' + org_grps[grp])
+    except IOError:
+        print ("File ", orgs, " not found")
+
 def load_org_groups(orgs, attr_12):
     try:
         fd = open(orgs,'r')

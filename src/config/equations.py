@@ -1,4 +1,5 @@
 #coding=ISO_8859-1
+#UTF-8
 '''
 Created on Nov 17, 2009
 
@@ -71,11 +72,11 @@ def load_equations(file,conn):
         for one_row in rows:
             act_cd_id[one_row[0]] = one_row[1]
         
-        # 0: código ecuación
-        # 1: Nombre ecuación
-        # 2: Código actividad asociada
+        # 0: cï¿½digo ecuaciï¿½n
+        # 1: Nombre ecuaciï¿½n
+        # 2: Cï¿½digo actividad asociada
         # 3: Tipo (MINUTOS)
-        # 4: Ecuación 
+        # 4: Ecuaciï¿½n 
         # 5: Org
         # 6: Min Max (Y|N)
         while(len(str) != 0):
@@ -89,7 +90,7 @@ def load_equations(file,conn):
             #if vals[0] == 'VENTA309':
             #    pass
             if len(vals[2].strip()) > 0 and vals[2] not in act_cd_id:
-                print('Activity error in equation ' + vals[0])
+                print('--Activity error in equation ' + vals[0])
                 ok = False
             else:
                 #if vals[0] == 'TraAssrSDC':
@@ -115,7 +116,8 @@ def load_equations(file,conn):
                         sql = "INSERT INTO staffing_variable "
                         sql += "(staffing_variable_id, staffing_variable_cd, staffing_variable_name, format_string, sum_p, uom_id, staffing_variable_type_id, productivity_p) "
                         sql += "VALUES (" + sv_id.__str__() + ", '" + vals[0] + "', '" + vals[1][0:32] + "', NULL, NULL, 2, 1, 0)"
-                        cursor.execute(sql)
+                        print(sql+";")
+                        #cursor.execute(sql)
                         
                         cursor.execute('select SEQ_EQUATION_ID.nextval from dual')
                         r = cursor.fetchone()
@@ -127,7 +129,8 @@ def load_equations(file,conn):
                             
                         sql = "INSERT INTO staffing_equation (equation_id, equation, staffing_variable_id) VALUES "
                         sql += "(" + se_id.__str__() + ",'" +eq_val+ "' ," + sv_id.__str__() + ")"
-                        cursor.execute(sql)
+                        print(sql+";")
+                        #cursor.execute(sql)
                         
                         if len(vals[2].strip()) > 0:
                             cursor.execute('select SEQ_EQUATION_LINK_ID.nextval from dual')
@@ -135,7 +138,8 @@ def load_equations(file,conn):
                             el_id = r[0]
                             sql = "INSERT INTO staffing_equation_activity (equation_link_id, calculate_increment, equation_id, activity_entry_id, org_entry_id, strictly_org_hours_p) "
                             sql += "VALUES (" + el_id.__str__() + ", 15," + se_id.__str__() + " , " + act_cd_id[vals[2]].__str__() + ", NULL, 'N')"
-                            cursor.execute(sql)
+                            print(sql+";")
+                            #cursor.execute(sql)
     
                         min_max_ids = list()
                         sql = ""
@@ -144,7 +148,8 @@ def load_equations(file,conn):
                         ev_id = r[0]
                         sql = "INSERT INTO staffing_equation_variable (equation_variable_id, counter, staffing_variable_id, equation_id) "
                         sql += "VALUES (" + ev_id.__str__() + ", -1, 1, " + se_id.__str__() + ")"
-                        cursor.execute(sql)
+                        print(sql+";")
+                        #cursor.execute(sql)
                         min_max_ids.append(ev_id)
                         
                         cursor.execute('select SEQ_EQUATION_VARIABLE_ID.nextval from dual')
@@ -152,7 +157,8 @@ def load_equations(file,conn):
                         ev_id = r[0]
                         sql = "INSERT INTO staffing_equation_variable (equation_variable_id, counter, staffing_variable_id, equation_id) "
                         sql += "VALUES (" + ev_id.__str__() + ", -1, 2, " + se_id.__str__() + ")"
-                        cursor.execute(sql)
+                        print(sql+";")
+                        #cursor.execute(sql)
                         min_max_ids.append(ev_id)
                         
                         cursor.execute('select SEQ_EQUATION_VARIABLE_ID.nextval from dual')
@@ -160,7 +166,8 @@ def load_equations(file,conn):
                         ev_id = r[0]
                         sql = "INSERT INTO staffing_equation_variable (equation_variable_id, counter, staffing_variable_id, equation_id) "
                         sql += "VALUES (" + ev_id.__str__() + ", -1, 3, " + se_id.__str__() + ")"
-                        cursor.execute(sql)
+                        print(sql+";")
+                        #cursor.execute(sql)
                         
                         counter = 1
                         for idx in range(len(parse_ret[0])):
@@ -171,9 +178,10 @@ def load_equations(file,conn):
                             sql = "INSERT INTO staffing_equation_variable (equation_variable_id, counter, staffing_variable_id, equation_id) "
                             sql += "VALUES(" + ev_id.__str__() + "," + counter.__str__() + " , " + var_cd_id[v].__str__() + ", " + se_id.__str__() + ")"
                             counter += 1
-                            cursor.execute(sql)
+                            print(sql+";")
+                            #cursor.execute(sql)
                             
-                        #Mínimo y maximo
+                        #Mï¿½nimo y maximo
                         if vals[6] == 'Y': 
                             cursor.execute('select SEQ_EQUATION_VALUE_ID.nextval from dual')
                             r = cursor.fetchone()
@@ -184,7 +192,8 @@ def load_equations(file,conn):
                             sql += "values (" + eval_id.__str__() + ", '20040301', NULL,0.0, '1,1,1,2|15,3|15,1,2,1,2|15,3|15,1,3,1,2|15,3|15,1,4,1,2|15,3|15,1,5,1,2|15,3|15,1,6,1,2|15,3|15,1,7,1,2|15,3|15,1',"
                             sql +=  min_max_ids[0].__str__() + ", 1, NULL, NULL, NULL, NULL)"
                             
-                            cursor.execute(sql)
+                            print(sql+";")
+                            #cursor.execute(sql)
 
                             cursor.execute('select SEQ_EQUATION_VALUE_ID.nextval from dual')
                             r = cursor.fetchone()
@@ -195,7 +204,8 @@ def load_equations(file,conn):
                             sql += "values (" + eval_id.__str__() + ", '20040301', NULL,0.0, NULL,"
                             sql +=  min_max_ids[1].__str__() + ", 1, NULL, NULL, NULL, NULL)"
                             
-                            cursor.execute(sql)
+                            print(sql+";")
+                            #cursor.execute(sql)
                         print("Equation : " + vals[0] + " " + vals[1] + " added.")
                         var_cd_id[vals[0]] = sv_id
                     except KeyError:
@@ -283,10 +293,11 @@ def load_var_el_grp(file, d_def, d_elem, d_grp):
 def insert_staff_vars(data, conn):
 
     cursor = conn.cursor()
-
+    sql=""
     try:
         for key in data.keys():
             sql = "SELECT SEQ_STAFFING_VARIABLE_ID.NEXTVAL FROM DUAL"
+            #print(sql+";")
             cursor.execute(sql)
             row = cursor.fetchone()
             sv_id = int(row[0])
@@ -295,13 +306,15 @@ def insert_staff_vars(data, conn):
             sql += "(staffing_variable_id, staffing_variable_cd, staffing_variable_name, format_string, sum_p, uom_id, staffing_variable_type_id, productivity_p) "
             sql += "VALUES (" + sv_id.__str__() + ", '" + key + "', '" + data[key][0] + "', NULL, NULL, 5,2, 'N')"
             # Execute sql against DB
-            cursor.execute(sql)
+            print(sql+";")
+#            cursor.execute(sql)
 
             sql = "insert into forecast_staffing_link (STAFFING_VARIABLE_ID,FORECAST_GROUP_ID,FORECAST_ELEMENT_ID,FORECAST_DEF_ID,LEAD_OR_LAG,STAFFING_INCREMENT) "
             sql += "values (" + sv_id.__str__() + ", " + data[key][1].__str__() + ", "
             sql += data[key][2].__str__() + ", " + data[key][3].__str__() + ", 0, 0)"
             
-            cursor.execute(sql)
+            print(sql+";")
+#            cursor.execute(sql)
             
     except:
         print("Unexpected error:", sys.exc_info()[0])
@@ -329,7 +342,7 @@ def work_stds(file):
             line = '    <parameter code="' + vals[0] + '" name="' + vals[1] + '" uom="' + vals[2] + '">\n' 
             if len(vals[0]) > 12:
                 line += '<!-- Parameter code ' + vals[0] + ' too long -->\n' 
-            line += '        <value org_code="' + vals[3] + '" base_value="' + vals[4] + '" eff_date="03/01/2004" exp_date="01/01/2999" />\n'  
+            line += '        <value org_code="' + vals[3] + '" base_value="' + vals[4] + '" eff_date="01/01/2005" exp_date="01/01/2999" />\n'  
             line += '    </parameter>\n'
             print(line)
             str = fd.readline()
@@ -413,6 +426,7 @@ def insert_work_standards(org_groups, f_ws, uom, conn, org_entries):
             sql += "VALUES (" + sv_id.__str__() + ", '" + d_w_std[param_cd].code + "', '" + d_w_std[param_cd].name 
             sql += "', NULL, NULL, " + d_w_std[param_cd].type.__str__() + ", 7, 'N')"
             
+            print(sql)
             cursor.execute(sql)
 
             it_orgs = iter(d_w_std[param_cd].org_ids)
@@ -428,6 +442,7 @@ def insert_work_standards(org_groups, f_ws, uom, conn, org_entries):
                 sql += "VALUES (" + svv_id.__str__() + ", '20040101', NULL, " + org_id[1].__str__() #d_w_std[param_cd].value.__str__() 
                 sql += ", NULL, NULL, " + org_id[0].__str__() + ", NULL, " + sv_id.__str__() + ", NULL)"
                 
+                print(sql)
                 cursor.execute(sql)
 
             it_grps = iter(d_w_std[param_cd].org_grps)
@@ -443,6 +458,7 @@ def insert_work_standards(org_groups, f_ws, uom, conn, org_entries):
                 sql += "VALUES (" + svv_id.__str__() + ", '20040101', NULL, " + grp_id[1].__str__() #d_w_std[param_cd].value.__str__() 
                 sql += ", NULL, NULL, NULL, NULL, " + sv_id.__str__() + ", " + grp_id[0].__str__() + ")"
 
+                print(sql)
                 cursor.execute(sql)
     except:
         print("Unexpected error:", sys.exc_info()[0])

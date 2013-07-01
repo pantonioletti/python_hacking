@@ -23,10 +23,12 @@ def load_orgs(file):
         while(len(str) != 0):
             str = str.replace('\n', '')
             vals = str.rsplit(';')
-            o_org = org(vals[0][8:], vals[1], vals[2], vals[3][8:])
+            #o_org = org(vals[0][8:], vals[1], vals[2], vals[3][8:]) Ripley
+            o_org = org(vals[0][7:], vals[1], vals[2], vals[3][7:]) # Falabella
             #print(o_org.cd + "#" + o_org.parent)
             d_orgs[o_org.cd] = o_org
-            if o_org.level == 'WG':
+            #if o_org.level == 'WG': Ripley
+            if o_org.level == 'DPARTAMENTO': #Falabella
                 d_orgs[o_org.parent].add_child(o_org)
             str = fd.readline()
         fd.close()
