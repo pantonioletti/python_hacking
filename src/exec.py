@@ -1,5 +1,5 @@
-#coding=UTF-8
-#XXXXISO_8859-1
+#coding=ISO_8859-1
+#XXXXUTF-8
 # -*- coding ISO_8859-1 -*-
 '''
 Created on Nov 30, 2009
@@ -84,11 +84,15 @@ else:
             from config.org_groups import load_attr12_db
             from config.org_groups import load_org_groups
             
-            conn = getConnection(params[1])
+            conn = getConnection(params[2])
             attr_12 = load_attr12_db(conn)
             conn.close()
             #load_attr_12('c:/dev/projects/ScriptsUtil/data/input/attr_12CL.txt')
-            load_org_groups('c:/dev/projects/ScriptsUtil/data/input/org_groupsCL.txt', attr_12)    
+            load_org_groups(params[1], attr_12)
+        elif params[0] == 'ORG_GROUPS2':
+            from config.org_groups import load_empty_org_groups
+            
+            load_empty_org_groups(params[1])
         elif params[0] == 'ORG_POS':
             d_orgs = dict()
             from config.org_api import load_org_positions
@@ -96,7 +100,7 @@ else:
         elif params[0] == 'WRK_STDS':
             #equations STEP 1
             from config.equations import work_stds
-            work_stds('C:/dev/projects/ScriptsUtil/data/input/work_standardsCL.txt')
+            work_stds(params[1])
         
         elif params[0] == 'ORG_PARAM':
             
@@ -111,8 +115,12 @@ else:
             d_og = get_org_groups(conn)
             d_uom = get_uom(conn)
             d_oe = get_org_entries(conn)
-            
-            insert_work_standards(d_og, params[1], d_uom, conn, d_oe)
+            try:
+                insert_work_standards(d_og, params[1], d_uom, conn, d_oe)
+            except:
+                conn.rollback()
+                raise
+                
             #conn.rollback()
             conn.commit()
             conn.close()
@@ -136,8 +144,8 @@ else:
                 conn.rollback()
                 raise
         
-            #conn.rollback()
-            conn.commit()
+            conn.rollback()
+            #conn.commit()
             conn.close()
         elif params[0] == 'EQUATIONS':
             #equations STEP 2 Create forecast parameters
@@ -149,8 +157,8 @@ else:
             except:
                 conn.rollback()
                 raise
-            #conn.rollback()
-            conn.commit()
+            conn.rollback()
+            #conn.commit()
             conn.close()
         
         elif params[0] == 'NEW_LINE':
@@ -185,6 +193,10 @@ else:
             conn.close()
             d_pos = load_positions(params[2],d_act, params[3])
             org_api.load_org_entries(params[1], params[3], params[4], d_pos)
+        elif params[0] == 'ORG_API2':
+            from config import org_api
+            #orgs, date, unit_org_level, d_org_pos
+            org_api.load_org_entries(params[1], params[2], params[3], dict())
         elif params[0] == 'LOAD_ACT':
             from config.activity_load import load_activities
         
