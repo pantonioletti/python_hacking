@@ -12,6 +12,7 @@ class App:
 	def __init__(self, master, proc_fn):
 		self.master = master
 		self.frame = tix.Frame(master)
+		self.frame.width = 150
 		self.frame.rowconfigure(0, minsize=15)
 		self.frame.rowconfigure(3, minsize=15)
 		self.frame.rowconfigure(5, minsize=15)
@@ -57,7 +58,7 @@ class App:
 			self.in_out_state = None
 		
 	def file_selection(self):
-		self.box = tix.ExFileSelectBox(self.master)
+		self.box = tix.ExFileSelectBox(self.master,)
 		
 		w = self.box.subwidget('cancel')
 		w['command']=self.box.destroy
@@ -65,6 +66,11 @@ class App:
 		w = self.box.subwidget('ok')
 		w['command']=self.file_select_ok
 		
+		#self.box.subwidget('filelist').width = 50 
+		
+		# Setting starting dir
+		#self.box.subwidget('dirlist').chdir(self.rootdir)
+
 		'''
 		self.subwidget_list['cancel'] = _dummyButton(self, 'cancel')
 		self.subwidget_list['ok'] = _dummyButton(self, 'ok')
