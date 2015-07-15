@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __author__ = 'pantonio'
 import sqlite3
 import datetime
@@ -7,32 +8,251 @@ from decimal import getcontext
 from decimal import ROUND_UP
 from sys import argv
 
+import mysql.connector
+import re
+import GPA_Config
 
-ROOT_EL = '<RadiantDocument Name="Generic_Metric_Import" client_id="1000006" ClientName=“GPA" LocalizationCode=“BR" Version="1.0" Batch="1.0" CreationSource="RadiantEMS 6.1" CreationTimestamp="2015-1-29T17:01:40">'
+
+
+ROOT_EL = '<RadiantDocument CreationSource="WFM RedPrairie">'
 DB_FILE = "C:\\Users\\pantonio\\Documents\\JDA\\WFM\\GPA\\DATA\\gpa_db.db"
 
 def insert_emp():
-    fd = open("C:\\Users\\pantonio\\Documents\\JDA\\WFM\\GPA\\BASE_ATIVOS_WORKFORCE.txt",'r')
+    sql = "INSERT INTO EMPLOYEE (JOB_STARTING_DATE,MATRICULA,STATUS,FIRST_NAME,LAST_NAME," \
+                                 "PASSWORDS,LANGUAGES,CPF,BIRTH_DATE,HIRE_DATE," \
+                                 "SEXO,JOB_IDENTIFIER,CCUSTO," \
+                                 "DESCR_CCUSTO,DEPT,CIDADE,HPM,SECTION,SECTION_DESC) VALUES (?, ?, ?, ?, ?,?, ?, ?, ?, ?,?, ?, ?, ?, ?,?, ?, ?, ?);"
+
+    fd = open("C:\\Users\\pantonio\\Documents\\JDA\\WFM\\GPA\\Data\\GPA_employees.csv",'r')
     line = fd.readline()
-    conn = sqlite3.connect("C:\\Users\\pantonio\\Documents\\JDA\\WFM\\GPA\\gpa_db.db")
-    cur = conn.cursor()
     count = 1
+    param = list()
     while(len(line) > 0):
         line = line.replace('\n', '')
-        line = line.replace(';"///";', ";")
-        line = line.replace('";"', '","')
-        line = line.replace(';)', '","')
-        line = "INSERT INTO EMPLOYEE (JOB_STARTING_DATE,MATRICULA,STATUS,FIRST_NAME,LAST_NAME,PASSWORDS,LANGUAGES,CPF,BIRTH_DATE,HIRE_DATE,SEXO,JOB_IDENTIFIER,ID_LOCAL,DESCR_LOCAL,CCUSTO,DESCR_CCUSTO,EMPR,DESCR_EMP) VALUES (" + line + ");"
-        line = line.replace(';)', ')')
-        cur.execute(line)
-        count = count + 1
-        if (count%1000 == 0):
-            conn.commit()
-            print(count.__str__() + " employees inserted")
+        data = line.split(",")
+        job_start = None
+        date = data[0].split("/")
+        if (len(date[2]) == 2):
+            if int(date[2]) > 15:
+                y = "19"
+            else:
+                y = "20"
+            job_start = datetime.date(int(y + date[2]), int(date[1]), int(date[0]))
+        elif (len(date[2])== 4):
+            job_start = datetime.date(int(date[2]),int(date[0]),int(date[1]))
+
+        birth_date = None
+        date = data[8].split("/")
+        if (len(date[2]) == 2):
+            birth_date = datetime.date(int("20" + date[2]), int(date[0]), int(date[1]))
+        elif (len(date[2])== 4):
+            birth_date = datetime.date(int(date[2]),int(date[0]),int(date[1]))
+
+        hire_date = None
+        date = data[9].split("/")
+        if (len(date[2]) == 2):
+            hire_date = datetime.date(int("20" + date[2]), int(date[0]), int(date[1]))
+        elif (len(date[2])== 4):
+            hire_date = datetime.date(int(date[2]),int(date[0]),int(date[1]))
+
+        param.append((job_start.strftime('%Y-%m-%d'), data[1], data[2], data[3], data[4], \
+                      data[5], data[6], data[7], birth_date.strftime('%Y-%m-%d'), hire_date.strftime('%Y-%m-%d'), \
+                      data[10], data[11], data[12], data[13], data[14], \
+                      data[15], data[16], data[17], data[18]))
+
         line = fd.readline()
+    conn = sqlite3.connect(DB_FILE)
+    cur = conn.cursor()
+    cur.executemany(sql, param)
     conn.commit()
-    print("Total employees inserted: " + count.__str__())
     conn.close()
+
+def emp_exp():
+    #substr(trim(first_name),1,30), substr(trim(last_name),1,30)
+    sql = "select JOB_STARTING_DATE,MATRICULA,STATUS,SUBSTR(TRIM(FIRST_NAME),1,30),SUBSTR(TRIM(LAST_NAME),1,30)," \
+                  "PASSWORDS,LANGUAGES,CPF,BIRTH_DATE,HIRE_DATE," \
+                  "SEXO,JOB_IDENTIFIER,CCUSTO," \
+                  "DESCR_CCUSTO,DEPT,CIDADE,HPM,SECTION,SECTION_DESC from employee "\
+                  "where CCUSTO = '1359' order by CCUSTO asc"
+    sql_avail = "select MATRICULA, DOW, START_TIME, END_TIME " \
+                "FROM EMP_AVAILABILITY "\
+                "WHERE MATRICULA = '?'" \
+                "ORDER BY DOW ASC"
+
+    conn = sqlite3.connect(DB_FILE)
+    cur = conn.cursor()
+    cur.execute(sql)
+    emp_data = cur.fetchall()
+
+    #  0 - JOB_STARTING_DATE,
+    #  1 - MATRICULA,
+    #  2 - STATUS,
+    #  3 - FIRST_NAME,
+    #  4 - LAST_NAME,
+    #  5 - PASSWORDS,
+    #  6 - LANGUAGES,
+    #  7 - CPF,
+    #  8 - BIRTH_DATE,
+    #  9 - HIRE_DATE,
+    # 10 - SEXO,
+    # 11 - JOB_IDENTIFIER,
+    # 12 - CCUSTO,
+    # 13 - DESCR_CCUSTO,
+    # 14 - DEPT,
+    # 15 - CIDADE,
+    # 16 - HPM,
+    # 17 - SECTION,
+    # 18 - SECTION_DESC
+    bu = None
+    avail_time = {'0608':{1:('08:00:00','20:00:00'),2:('07:00:00','22:00:00'),3:('07:00:00','22:00:00'),4:('07:00:00','22:00:00'),5:('07:00:00','22:00:00'),6:('07:00:00','22:00:00'),7:('07:00:00','22:00:00')}, \
+                  '1337':{1:('06:00:00','00:00:00'),2:('06:00:00','00:00:00'),3:('06:00:00','00:00:00'),4:('06:00:00','00:00:00'),5:('06:00:00','00:00:00'),6:('06:00:00','00:00:00'),7:('06:00:00','00:00:00')}, \
+                  '1350':{1:('07:00:00','00:00:00'),2:('07:00:00','00:00:00'),3:('07:00:00','00:00:00'),4:('07:00:00','00:00:00'),5:('07:00:00','00:00:00'),6:('07:00:00','00:00:00'),7:('07:00:00','00:00:00')}, \
+                  '1669':{1:('07:00:00','20:00:00'),2:('07:00:00','22:00:00'),3:('07:00:00','22:00:00'),4:('07:00:00','22:00:00'),5:('07:00:00','22:00:00'),6:('07:00:00','22:00:00'),7:('07:00:00','22:00:00')},
+                  '1359':{1:('17:00:00','17:00:00'),2:('17:00:00','17:00:00'),3:('17:00:00','17:00:00'),4:('17:00:00','17:00:00'),5:('17:00:00','17:00:00'),6:('17:00:00','17:00:00'),7:('17:00:00','17:00:00')}}
+    if len(emp_data)>0:
+        print("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>")
+        print("<EnterpriseDocument InterfaceName=\"Employee Interface\" Version=\"2.0\" CreationSource=\"WFM RedPrairie\" CreationTimestamp=\"2015-05-20T00:00:00\">")
+        print("<BusinessUnitList>")
+        for emp in emp_data:
+            if bu != emp[12]:
+                if bu is not None:
+                    print("</BusinessUnit>")
+                bu = emp[12]
+                print("<BusinessUnit id=\"" + bu +"\">")
+
+            print('<User id="' + emp[1] + '" statusCode="' + emp[2].lower() + '" firstName="' + emp[3] +'" lastName="' + emp[4]+ '" password="' + emp[5] + '" defaultLanguageName="' + emp[6] + '" >')
+            print("<RoleList>")
+            print("<Role id=\"Employee\" />")
+            print("</RoleList>")
+            print('<Employee ssn="' + emp[7] + '" birthDate="' + emp[8] + '" hireDate="' + emp[9] + '" gender="' + emp[10].lower() + '" managerLevelFlag="n" >')
+
+            cur2 = conn.cursor()
+            cur2.execute(sql_avail, emp[1])
+            avail_data = cur2.fetchall()
+            if bu in avail_time:
+                 print('<Availability start="2015-01-01" end="" >')
+                 print('<General dowID="1" start1="' + avail_time[bu][1][0] + '" end1="' + avail_time[bu][1][1] + '" />')
+                 print('<General dowID="2" start1="' + avail_time[bu][2][0] + '" end1="' + avail_time[bu][2][1] + '" />')
+                 print('<General dowID="3" start1="' + avail_time[bu][3][0] + '" end1="' + avail_time[bu][3][1] + '" />')
+                 print('<General dowID="4" start1="' + avail_time[bu][4][0] + '" end1="' + avail_time[bu][4][1] + '" />')
+                 print('<General dowID="5" start1="' + avail_time[bu][5][0] + '" end1="' + avail_time[bu][5][1] + '" />')
+                 print('<General dowID="6" start1="' + avail_time[bu][6][0] + '" end1="' + avail_time[bu][6][1] + '" />')
+                 print('<General dowID="7" start1="' + avail_time[bu][7][0] + '" end1="' + avail_time[bu][7][1] + '" />')
+                 print('</Availability>')
+            print("<JobList>")
+            print('<Job id="' + emp[11] + '" start="' + emp[0] + '">')
+            #print("<PrimaryJobInfo payPolicyId=\"Store Personnel Pay Policy\" punchRuleId=\"Store Punch Rule\" shiftStrategyId=\"Turno CLT\" />")
+            punch_rule = ""
+            if bu in ('0608', '1669'):
+                punch_rule = '1000102'
+            else:
+                punch_rule = '1000101'
+
+            print("<PrimaryJobInfo payPolicyId=\"Standard Pay Rule\" punchRuleId=\"" + punch_rule + "\" shiftStrategyId=\"Turno CLT\" />")
+            print('<JobRate start="2015-01-01" rate="1.0" />')
+            print("</Job>")
+            print("</JobList>")
+            print("</Employee>")
+            print("</User>")
+        print("</BusinessUnit>")
+    print("</BusinessUnitList>")
+    print("</EnterpriseDocument>")
+    conn.close()
+
+
+def emp_avail_exp():
+    # substr(trim(first_name),1,30), substr(trim(last_name),1,30)
+    sql = "select E.JOB_STARTING_DATE,E.MATRICULA,E.STATUS,SUBSTR(TRIM(E.FIRST_NAME),1,30),SUBSTR(TRIM(E.LAST_NAME),1,30)," \
+          "E.PASSWORDS,E.LANGUAGES,E.CPF,E.BIRTH_DATE,E.HIRE_DATE," \
+          "E.SEXO,E.JOB_IDENTIFIER,E.CCUSTO," \
+          "E.DESCR_CCUSTO,E.DEPT,E.CIDADE,E.HPM,E.SECTION,E.SECTION_DESC, EA.DOW, EA.START_TIME, EA.END_TIME " \
+          "from employee e, emp_availability ea " \
+          "where E.MATRICULA = EA.MATRICULA"
+
+    conn = sqlite3.connect(DB_FILE)
+    cur = conn.cursor()
+    cur.execute(sql)
+    emp_data = cur.fetchall()
+    conn.close()
+
+    #  0 - JOB_STARTING_DATE,
+    #  1 - MATRICULA,
+    #  2 - STATUS,
+    #  3 - FIRST_NAME,
+    #  4 - LAST_NAME,
+    #  5 - PASSWORDS,
+    #  6 - LANGUAGES,
+    #  7 - CPF,
+    #  8 - BIRTH_DATE,
+    #  9 - HIRE_DATE,
+    # 10 - SEXO,
+    # 11 - JOB_IDENTIFIER,
+    # 12 - CCUSTO,
+    # 13 - DESCR_CCUSTO,
+    # 14 - DEPT,
+    # 15 - CIDADE,
+    # 16 - HPM,
+    # 17 - SECTION,
+    # 18 - SECTION_DESC
+    bu = None
+    avail_time = {'0608': {1: ('08:00:00', '20:00:00'), 2: ('07:00:00', '22:00:00'), 3: ('07:00:00', '22:00:00'),
+                           4: ('07:00:00', '22:00:00'), 5: ('07:00:00', '22:00:00'), 6: ('07:00:00', '22:00:00'),
+                           7: ('07:00:00', '22:00:00')}, \
+                  '1337': {1: ('06:00:00', '00:00:00'), 2: ('06:00:00', '00:00:00'), 3: ('06:00:00', '00:00:00'),
+                           4: ('06:00:00', '00:00:00'), 5: ('06:00:00', '00:00:00'), 6: ('06:00:00', '00:00:00'),
+                           7: ('06:00:00', '00:00:00')}, \
+                  '1350': {1: ('07:00:00', '00:00:00'), 2: ('07:00:00', '00:00:00'), 3: ('07:00:00', '00:00:00'),
+                           4: ('07:00:00', '00:00:00'), 5: ('07:00:00', '00:00:00'), 6: ('07:00:00', '00:00:00'),
+                           7: ('07:00:00', '00:00:00')}, \
+                  '1669': {1: ('07:00:00', '20:00:00'), 2: ('07:00:00', '22:00:00'), 3: ('07:00:00', '22:00:00'),
+                           4: ('07:00:00', '22:00:00'), 5: ('07:00:00', '22:00:00'), 6: ('07:00:00', '22:00:00'),
+                           7: ('07:00:00', '22:00:00')},
+                  '1359': {1: ('17:00:00', '17:00:00'), 2: ('17:00:00', '17:00:00'), 3: ('17:00:00', '17:00:00'),
+                           4: ('17:00:00', '17:00:00'), 5: ('17:00:00', '17:00:00'), 6: ('17:00:00', '17:00:00'),
+                           7: ('17:00:00', '17:00:00')}}
+    if len(emp_data) > 0:
+        print("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>")
+        print(
+            "<EnterpriseDocument InterfaceName=\"Employee Interface\" Version=\"2.0\" CreationSource=\"WFM RedPrairie\" CreationTimestamp=\"2015-05-20T00:00:00\">")
+        print("<BusinessUnitList>")
+        for emp in emp_data:
+            if bu != emp[12]:
+                if bu is not None:
+                    print("</BusinessUnit>")
+                bu = emp[12]
+                print("<BusinessUnit id=\"" + bu + "\">")
+
+            print(
+                '<User id="' + emp[1] + '" statusCode="' + emp[2].lower() + '" firstName="' + emp[3] + '" lastName="' +
+                emp[4] + '" password="' + emp[5] + '" defaultLanguageName="' + emp[6] + '" >')
+            print("<RoleList>")
+            print("<Role id=\"Employee\" />")
+            print("</RoleList>")
+            print('<Employee ssn="' + emp[7] + '" birthDate="' + emp[8] + '" hireDate="' + emp[9] + '" gender="' + emp[
+                10].lower() + '" managerLevelFlag="n" >')
+
+            print('<Availability start="2015-01-01" end="" >')
+            print('<General dowID="' + emp[19].__str__() + '" start1="' + emp[20] + '" end1="' + emp[21] + '" />')
+            print('</Availability>')
+            print("<JobList>")
+            print('<Job id="' + emp[11] + '" start="' + emp[0] + '">')
+            # print("<PrimaryJobInfo payPolicyId=\"Store Personnel Pay Policy\" punchRuleId=\"Store Punch Rule\" shiftStrategyId=\"Turno CLT\" />")
+            punch_rule = ""
+            if bu in ('0608', '1669'):
+                punch_rule = '1000102'
+            else:
+                punch_rule = '1000101'
+
+            print(
+                "<PrimaryJobInfo payPolicyId=\"Standard Pay Rule\" punchRuleId=\"" + punch_rule + "\" shiftStrategyId=\"Turno CLT\" />")
+            print('<JobRate start="2015-01-01" rate="1.0" />')
+            print("</Job>")
+            print("</JobList>")
+            print("</Employee>")
+            print("</User>")
+        print("</BusinessUnit>")
+    print("</BusinessUnitList>")
+    print("</EnterpriseDocument>")
 
 def txt_to_xml():
     fd = open("C:\\Users\\pantonio\\Documents\\JDA\\WFM\\GPA\\BASE_ATIVOS_WORKFORCE.txt",'r')
@@ -86,7 +306,7 @@ def txt_to_xml():
                     stores[dFields[13]]=st
                 st[dFields[7]] = dFields
         line = fd.readline()
-        count = count + 1
+        count += 1
     for key in stores.keys():
         dStore = stores[key]
         fdo.write("<BusinessUnit id=\"" + key.replace("\"","") +"\">\n")
@@ -241,7 +461,7 @@ def insert_stat():
             dd.tickets[ticketid] = amt
 
         if merceria == "MERCEARIA":
-            dd.merceria_qty=dd.merceria_qty+1
+            dd.merceria_qty += 1
         '''stmt = "insert into raw_stats(storeid,cashierid,date,ticketid,qty,trxtype,ismerceria,isexpress,tktamt) values ("
         stmt = stmt + "'" + data[0] + "',"
         stmt = stmt + "'" + data[1] + "',"
@@ -263,7 +483,7 @@ def insert_stat():
             conn.commit()
             print(count.__str__() + " transactions inserted")
         '''
-        count = count + 1
+        count += 1
         line = fd.readline()
     #conn.commit()
     #print("Total transactions inserted: " + count.__str__())
@@ -278,7 +498,7 @@ def process(file):
     ins_stmt = "insert into daily_sales (storeid,date,amount) values(?,?,?)"
     ins_param = list()
     while len(line)>0:
-        count = count + 1
+        count += 1
         line = line.replace('\n', '')  #remove new line character
         # Split by field as:
         # 0 CodLoja;
@@ -324,7 +544,7 @@ def process(file):
         if ticket not in daily_data.tickets:
             daily_data.tickets[ticket] = tkt_amt
             if trans_type in incr_data.trx_type:
-                incr_data.trx_type[trans_type] = incr_data.trx_type[trans_type] + 1
+                incr_data.trx_type[trans_type] += 1
             try:
                 daily_data.amt = daily_data.amt + Decimal(data[8])
             except Exception as err:
@@ -362,7 +582,61 @@ def process(file):
     '''
     fd.close()
 
+def load_data_from_file():
+    rep = dict((re.escape(k),v) for k, v in GPA_Config.replacements.items())
+    pattern = re.compile("|".join(rep.keys()))
+
+    conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
+    stmt = "insert into trans_file (storeid,ticketid,items,date,trans_type,mercearia,amount,time_incr) values (%s,%s,%s,%s,%s,%s,%s,%s)"
+    params = list()
+    cur = conn.cursor()
+
+    tot_reads = 0
+
+    for file in GPA_Config.files2proc:
+        fd = open(file,'r')
+        fd.readline()
+        line = fd.readline()
+
+        count = 0
+        while len(line) > 0:
+            line = line.replace('.','')
+            line = pattern.sub(lambda m: rep[re.escape(m.group(0))],line)
+            data = line.split('\t')
+            tot_reads += 1
+
+            storeid = data[0]
+            ticket = data[1] + "-" + data[2]
+            items_qty = data[3]
+            date = parsedate(data[4])
+            trans_type = data[5]
+            if data[6] == 'MERCEARIA':
+                is_mercearia = 1
+            else:
+                is_mercearia = 0
+            tkt_amt = data[8]
+            time_incr = parsetime(data[9])
+
+            params.append((storeid, ticket, items_qty, date.strftime("%Y-%m-%d"),trans_type, is_mercearia, tkt_amt, time_incr.strftime("%H:%M:%S")))
+            count += 1
+            if(count>=500):
+                cur.executemany(stmt,params)
+                conn.commit()
+                count = 0
+                params = list()
+                #print("Total lines read: " + tot_reads.__str__())
+
+            line = fd.readline()
+        if count > 0:
+            cur.executemany(stmt,params)
+            conn.commit()
+        print("Total lines read: " + tot_reads.__str__())
+        fd.close()
+    conn.close()
+
+
 def just_insert_into_db(file):
+    print("Start processing : " + file)
     fd = open(file,'r')
     count = 0
     line = fd.readline()
@@ -371,7 +645,7 @@ def just_insert_into_db(file):
     conn = sqlite3.connect(DB_FILE)
     params = list()
     while len(line)>0:
-        count = count + 1
+        count += 1
         line = line.replace('\n', '')  #remove new line character
         # Split by field as:
         # 0 CodLoja;
@@ -401,7 +675,7 @@ def just_insert_into_db(file):
 
         params.append( (storeid, ticket, items_qty, date.strftime("%Y-%m-%d"),trans_type, is_mercearia, tkt_amt, time_incr.strftime("%H:%M:%S")))
 
-        if len(data) == 10000:
+        if len(data) == 5:
             cur = conn.cursor()
             cur.executemany(stmt,params)
             conn.commit()
@@ -500,27 +774,34 @@ class SimpleIncr:
         return s
 
 def db_insert_transctions(data):
-    ins_stmt = "insert into daily_transactions (storeid,date,increment,trans_type,count) values (?,?,?,?,?)"
+    ins_stmt = "insert into daily_transactions (storeid,date,increment,trans_type,count) values (%s,%s,%s,%s,%s)"
     if len(data)>0:
-        conn = sqlite3.connect(DB_FILE)
+        #conn = sqlite3.connect(DB_FILE)
+        conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
         cur = conn.cursor()
         cur.executemany(ins_stmt,data)
         conn.commit()
         conn.close()
 
-
-def count_transactions(year):
-
+def count_trxs(year, date_filter):
     store = None
     types = None
 
     sid = 0
     date = None
 
-    conn = sqlite3.connect(DB_FILE)
+    conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
     cur = conn.cursor()
+
     # Gather all store/day pairs
-    cur.execute("select distinct storeid, date from trans_file where date like '" + year.__str__() + "%'")
+    stmt = "select distinct storeid, date from trans_file"
+    if year != 0:
+        stmt += " where date like '" + year.__str__() + "%' " + date_filter
+    else:
+        if len(date_filter.trim()) > 0:
+            stmt += date_filter.replace('and', 'where')
+
+    cur.execute(stmt)
     st_d = cur.fetchall()
     for store_day in st_d:
         if sid != store_day[0]:
@@ -534,8 +815,8 @@ def count_transactions(year):
         cur.execute("select distinct a.ticketid, b.name, a.time_incr, b.value "
                     "from trans_file a, labor_standard b "
                     "where b.name = trans_type "
-                    "and storeid = ? "
-                    "and date = ? "
+                    "and storeid = %s "
+                    "and date = %s "
                     "order by a.time_incr asc, a.ticketid asc, b.value desc", store_day)
         trans = cur.fetchall()
         tkt = ""
@@ -557,7 +838,71 @@ def count_transactions(year):
                 if row[1] not in types:
                     types[row[1]] = 1
                 else:
-                    types[row[1]] = types[row[1]] + 1
+                    types[row[1]] += 1
+
+        if len(types) > 0:
+            for type in types.keys():
+                store.addTrxs(date, incr, type, types[type])
+
+
+    if store is not None:
+        if types is not None and len(types) > 0:
+            for type in types.keys():
+                store.addTrxs(date, incr, type, types[type])
+        db_insert_transctions(store.getData())
+
+    conn.close()
+
+def count_transactions(year, date_filter):
+
+    store = None
+    types = None
+
+    sid = 0
+    date = None
+
+    #conn = sqlite3.connect(DB_FILE)
+    conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
+    cur = conn.cursor()
+    # Gather all store/day pairs
+    cur.execute("select distinct storeid, date from trans_file where date like '" + year.__str__() + "%' " + date_filter)
+    st_d = cur.fetchall()
+    for store_day in st_d:
+        if sid != store_day[0]:
+            if store is not None and len(store.days)>0:
+                db_insert_transctions(store.getData())
+
+            sid = store_day[0]
+            store = SimpleStore(sid)
+        date = store_day[1]
+        # For every store/day gather all transactions
+        cur.execute("select distinct a.ticketid, b.name, a.time_incr, b.value "
+                    "from trans_file a, labor_standard b "
+                    "where b.name = trans_type "
+                    "and storeid = %s "
+                    "and date = %s "
+                    "order by a.time_incr asc, a.ticketid asc, b.value desc", store_day)
+        trans = cur.fetchall()
+        tkt = ""
+        types = dict()
+        incr = None
+
+        for row in trans:
+            #I'm counting transactions ie tickets so I consider only the first occurrence of it
+            if tkt != row[0]:
+                tkt = row[0]
+                if incr != row[2]:
+                    if incr is None:
+                        incr = row[2]
+                    else:
+                        for type in types.keys():
+                            store.addTrxs(date, incr, type, types[type])
+                        types = dict()
+                        incr = row[2]
+                if row[1] not in types:
+                    types[row[1]] = 1
+                else:
+                    types[row[1]] += 1
 
         if len(types) > 0:
             for type in types.keys():
@@ -573,9 +918,11 @@ def count_transactions(year):
     conn.close()
 
 
-def sales_exp(year):
-    sel_stmt = "select storeid, date, amount from daily_sales where date like '" + year.__str__() + "%' order by storeid asc, date asc"
-    conn = sqlite3.connect(DB_FILE)
+def sales_exp(year, filter):
+
+    sel_stmt = "select storeid, date_format(date,'%Y-%m-%dT00:00:00'), amount from daily_sales where date like '" + year.__str__() + "%' " + filter + " order by storeid asc, date asc"
+    conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
+    #conn = sqlite3.connect(DB_FILE)
     cur = conn.cursor()
     cur.execute(sel_stmt)
     s = str()
@@ -588,15 +935,15 @@ def sales_exp(year):
             stores[sale[0]].append(sale)
 
         sales = cur.fetchmany(1000)
-    print('<RadiantDocument Name="Generic_Metric_Import" client_id="1000006" ClientName="GPA" LocalizationCode="BR" Version="1.0" Batch="1.0" CreationSource="RadiantEMS 6.1" CreationTimestamp="2015-1-29T17:01:40">')
-    print('<DataSet name="daily" source="Actual" freq="Day">')
+    print('<RadiantDocument CreationSource="WFM RedPrairie">')
+    print('<DataSet name="Generic Import" source="Actual" freq="Day">')
     for st in stores.keys():
         print('<Dimension ref_name="bu_code" value="' + st.__str__() + '">')
         print('<Metric ref_name="Total Store Sales">')
         for ds in stores[st]:
-            d = ds[1].replace(' ','T')
+            d = ds[1]
             v = ds[2]
-            print('<Data date="{0} " value="{1:.2f}"/>'.format(d,v))
+            print('<Data date="{0}" value="{1:.2f}"/>'.format(d,v))
         print('</Metric>')
         print('</Dimension>')
 
@@ -604,77 +951,288 @@ def sales_exp(year):
     print('</RadiantDocument>')
     conn.close()
 
-def items_exp(year):
-    print ('<RadiantDocument CreationSource="WFM RedPrairie">')
-    print('<DataSet name="metricquarterhour" source="Actual" freq="QuarterHour">')
+def mercearia_exp(date_filter):
+    #Mercearia Itens
+    sel_stmt = "select storeid, date_format(date,'%Y-%m-%dT00:00:00'), items from daily_mercearia where " + date_filter + " order by storeid asc, date asc"
+    #conn = sqlite3.connect(DB_FILE)
+    conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
+    cur = conn.cursor()
+    cur.execute(sel_stmt)
+    s = str()
+    stores = dict()
+    mecearia = cur.fetchmany(1000)
+    while len(mecearia)> 0 :
+        for m in mecearia:
+            if m[0] not in stores:
+                stores[m[0]] = list()
+            stores[m[0]].append(m)
 
-    stmt = "select distinct storeid from daily_items where date like '" + year.__str__() +  "%'"
-    conn = sqlite3.connect(DB_FILE)
+        mecearia = cur.fetchmany(1000)
+    print('<RadiantDocument CreationSource="WFM RedPrairie">')
+    print('<DataSet name="Generic Import" source="Actual" freq="Day">')
+    for st in stores.keys():
+        print('<Dimension ref_name="bu_code" value="' + st.__str__() + '">')
+        print('<Metric ref_name="Mercearia Itens">')
+        for ds in stores[st]:
+            d = ds[1]
+            v = ds[2]
+            print('<Data date="{0}" value="{1:.2f}"/>'.format(d,v))
+        print('</Metric>')
+        print('</Dimension>')
+
+    print('</DataSet>')
+    print('</RadiantDocument>')
+    conn.close()
+
+def items_exp(year, str_filter, date_filter):
+    print ('<RadiantDocument CreationSource="WFM RedPrairie">')
+    print('<DataSet name="Generic Import" source="Actual" freq="QuarterHour">')
+
+    stmt = "select distinct storeid from daily_items where date like '" + year.__str__() +  "%' " + str_filter + " " + date_filter
+    conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
+    #sqlite3.connect(DB_FILE)
     cur = conn.cursor()
     cur.execute(stmt)
     stores = cur.fetchall()
 
-    stmt = "select date || 'T'||time_incr dt, items " \
+    stmt = "select concat(date_format(date,'%Y-%m-%d'),'T',time_incr) dt, items " \
             "from daily_items " \
-            "where storeid = ? " \
-            "and date like '" + year.__str__() + "%' "\
-            "order by dt"
+            "where storeid = %s "
+    if len(date_filter) > 0:
+        stmt = stmt + date_filter
+    else:
+        stmt = stmt + "and date like '" + year.__str__() + "%' "
+    stmt += "order by dt"
 
     for store in stores:
         cur.execute(stmt, store)
         data = cur.fetchall()
         print('<Dimension ref_name="bu_code" value="' + store[0].__str__() + '">')
-        print('<Metric ref_name="items">')
+        print('<Metric ref_name="Itens">')
         for d in data:
-            print('<Data date="{0} " value="{1:.2f}"/>'.format(d[0],d[1]))
+            print('<Data date="{0}" value="{1:.2f}"/>'.format(d[0],d[1]))
         print('</Metric>')
         print('</Dimension>')
     print('</DataSet>')
     print ('</RadiantDocument>')
     conn.close()
 
-def trxs_exp(year):
+def dinheiro_exp(date_filter):
     print ('<RadiantDocument CreationSource="WFM RedPrairie">')
-    print('<DataSet name="metricquarterhour" source="Actual" freq="QuarterHour">')
+    print('<DataSet name="Generic Import" source="Actual" freq="QuarterHour">')
 
-    stmt = "select distinct storeid from daily_transactions where date like '" + year.__str__() + "%'"
-    conn = sqlite3.connect(DB_FILE)
+    stmt = "select distinct storeid from daily_cash where " + date_filter
+    conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
+    #conn = sqlite3.connect(DB_FILE)
+    cur = conn.cursor()
+    cur.execute(stmt)
+    stores = cur.fetchall()
+
+    stmt = "select concat(date_format(date,'%Y-%m-%d'),'T',time_incr) dt, cash_amt " \
+            "from daily_cash " \
+            "where storeid = %s " \
+            "and " + date_filter + " "\
+            "order by dt"
+
+    for store in stores:
+        cur.execute(stmt, store)
+        data = cur.fetchall()
+        print('<Dimension ref_name="bu_code" value="' + store[0].__str__() + '">')
+        print('<Metric ref_name="Dinheiro Ventas">')
+        for d in data:
+            print('<Data date="{0}" value="{1:.2f}"/>'.format(d[0],d[1]))
+        print('</Metric>')
+        print('</Dimension>')
+    print('</DataSet>')
+    print ('</RadiantDocument>')
+    conn.close()
+
+def trxs_exp(date_filter):
+
+    fd = open(GPA_Config.out_file, mode='w', encoding='utf-8')
+    fd.write ('<?xml version="1.0" encoding="UTF-8"?>\n')
+    fd.write ('<RadiantDocument CreationSource="WFM RedPrairie">\n')
+    fd.write('<DataSet name="Generic Import" source="Actual" freq="QuarterHour">\n')
+
+    stmt = "select distinct storeid from daily_transactions where " + date_filter
+    conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
+    #conn = sqlite3.connect(DB_FILE)
     cur = conn.cursor()
     cur.execute(stmt)
     stores = cur.fetchall()
 
     stmt1 = "select distinct trans_type " \
             "from daily_transactions " \
-            "where storeid = ? " \
-            "and date like '" + year.__str__() + "%'"
+            "where storeid = %s " \
+            "and " + date_filter
 
-    stmt2 = 'select date || \'T\'||increment dt, count ' \
+    stmt2 = "select concat(date_format(date,'%Y-%m-%d'),'T',increment) dt, count " \
             'from daily_transactions ' \
-            'where storeid = ? ' \
-            "and date like '" + year.__str__() + "%'" \
-            'and trans_type = ? ' \
+            'where storeid = %s ' \
+            "and " + date_filter + " " \
+            'and trans_type = %s ' \
             'order by dt'
 
     for store in stores:
-        print('<Dimension ref_name="bu_code" value="' + store[0].__str__() + '">')
+        fd.write('<Dimension ref_name="bu_code" value="' + store[0].__str__() + '">\n')
         cur.execute(stmt1, store)
         trxs = cur.fetchall()
         for t in trxs:
             cur.execute(stmt2,(store[0],t[0]))
-            print('<Metric ref_name="' + t[0] + '">')
+            fd.write('<Metric ref_name="' + t[0] + '">\n')
             data = cur.fetchall()
             for d in data:
-                print('<Data date="{0} " value="{1:.0f}"/>'.format(d[0],d[1]))
-            print('</Metric>')
-        print('</Dimension>')
-    print('</DataSet>')
-    print ('</RadiantDocument>')
+                fd.write('<Data date="{0}" value="{1:.0f}"/>\n'.format(d[0],d[1]))
+            fd.write('</Metric>\n')
+        fd.write('</Dimension>\n')
+    fd.write('</DataSet>\n')
+    fd.write ('</RadiantDocument>')
     conn.close()
+    fd.close()
+
+
+def trxs_exp2(date_filter):
+    fd = open(GPA_Config.out_file, mode='w', encoding='utf-8')
+    fd.write ('<?xml version="1.0" encoding="UTF-8"?>\n')
+    fd.write ('<RadiantDocument CreationSource="WFM RedPrairie">\n')
+    fd.write('<DataSet name="Generic Import" source="Actual" freq="QuarterHour">\n')
+
+    stmt = "select distinct storeid from daily_transactions where " + date_filter
+    #conn = sqlite3.connect(DB_FILE)
+    conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
+    cur = conn.cursor()
+    cur.execute(stmt)
+    stores = cur.fetchall()
+
+    stmt2 = "select concat(date_format(date,'%Y-%m-%d'),'T',increment) dt, sum(count) " \
+            'from daily_transactions ' \
+            'where storeid = %s ' \
+            "and " + date_filter + " " \
+            "group by date, increment " \
+            'order by dt'
+
+    for store in stores:
+        fd.write('<Dimension ref_name="bu_code" value="' + store[0].__str__() + '">\n')
+        cur.execute(stmt2,(store))
+        fd.write('<Metric ref_name="Transacao">\n')
+        data = cur.fetchall()
+        for d in data:
+            fd.write('<Data date="{0}" value="{1:.0f}"/>\n'.format(d[0],d[1]))
+        fd.write('</Metric>\n')
+        fd.write('</Dimension>\n')
+    fd.write('</DataSet>\n')
+    fd.write ('</RadiantDocument>\n')
+    conn.close()
+    fd.close()
+
+def calc_sales(date_filter):
+
+    stmt = "insert into daily_sales (storeid, date, amount)" \
+           "select tf.storeid, tf.date, sum(tf.amount) " \
+           "from (select distinct storeid, ticketid, date, amount " \
+           "from trans_file " \
+           "where " + date_filter + ") tf " \
+           "group by tf.storeid, tf.date"
+
+    conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
+    #conn = sqlite3.connect(DB_FILE)
+    cur = conn.cursor()
+    cur.execute(stmt)
+    conn.commit()
+    conn.close()
+
+def calc_items(filter):
+
+    stmt = "insert into daily_items (storeid, date, time_incr, items) " \
+           "select storeid, date, time_incr, sum(items) " \
+           "from trans_file " \
+           "where " + filter + " " \
+           "group by storeid, date, time_incr"
+
+    conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
+    #conn = sqlite3.connect(DB_FILE)
+    cur = conn.cursor()
+    cur.execute(stmt)
+    conn.commit()
+    conn.close()
+
+def calc_mercearia(filter):
+
+    stmt = "insert into daily_mercearia (storeid, date, items) " \
+           "select storeid, date, sum(items) " \
+           "from trans_file " \
+           "where "+filter+" " \
+           "and mercearia = '1' " \
+           "group by storeid, date"
+
+
+    conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
+    #conn = sqlite3.connect(DB_FILE)
+    cur = conn.cursor()
+    cur.execute(stmt)
+    conn.commit()
+    conn.close()
+
+def calc_cash(filter):
+
+    stmt = "insert into daily_cash (storeid, date, time_incr, cash_amt) " \
+           "select cs.storeid, cs.date, cs.time_incr, sum(cs.amount) " \
+           "from (select distinct storeid, date, time_incr, ticketid, amount " \
+           "from trans_file " \
+           "where "+filter+" " \
+           "and   trans_type = 'Transacao Dinheiro') cs " \
+           "group by cs.storeid, cs.date, cs.time_incr"
+
+
+    conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
+    #conn = sqlite3.connect(DB_FILE)
+    cur = conn.cursor()
+    cur.execute(stmt)
+    conn.commit()
+    conn.close()
+
+
+getcontext().prec = 2
+getcontext().rounding = ROUND_UP
+
+
+
+if GPA_Config.exec_cmd == 'sales':
+    sales_exp(2015,"and date > '2015-06-28'")
+elif GPA_Config.exec_cmd == 'file_import':
+    load_data_from_file()
+elif GPA_Config.exec_cmd == 'items':
+    items_exp(2015,"and storeid in ('1337', '1350', '1359','1669', '0608') ", "and date > '2015-06-21' ")
+elif GPA_Config.exec_cmd == 'count_trxs':
+    count_trxs(2015, "and date > '2015-06-06' ")
+elif GPA_Config.exec_cmd == 'trx_det':
+    trxs_exp("date > '2015-06-28' ")
+elif GPA_Config.exec_cmd == 'trx_tot':
+    trxs_exp2("date > '2015-06-06' ")
+elif GPA_Config.exec_cmd == 'mercearia':
+    mercearia_exp("date > '2015-06-06' ")
+elif GPA_Config.exec_cmd == 'cash':
+    dinheiro_exp("date > '2015-06-06' ")
+elif GPA_Config.exec_cmd == 'calc_sales':
+    calc_sales("date > '2015-06-28' and storeid in ('0608','1669') ")
+elif GPA_Config.exec_cmd == 'calc_items':
+    calc_items(" date > '2015-06-28'")
+    #storeid in ('1337', '1350', '1359', '1669', '0608') " \
+elif GPA_Config.exec_cmd == 'calc_mercearia':
+    calc_mercearia(" date > '2015-06-28'")
+    #storeid in ('1337', '1350', '1359', '1669', '0608') " \
+    #       "and date >= '2015-05-19'
+elif GPA_Config.exec_cmd == 'calc_cash':
+    calc_mercearia(" date > '2015-06-28'")
+exit(1)
+
+
 
 #print(file)
 #insert_emp()
 #insert_stat()
 
+#emp_avail_exp()
 
 #Use it to split a file by an inside criteria
 #split_by_store(argv[1],argv[2])
@@ -682,35 +1240,81 @@ def trxs_exp(year):
 
 
 
-getcontext().prec = 2
-getcontext().rounding = ROUND_UP
+
 
 #Step 1 - load files
 '''
-if len(argv) < 2:
-    print("Give the file name to process")
-else:
-    fdp = open(argv[1])
-    file_path = fdp.readline()
-    while len(file_path) > 0:
-        file_path = file_path.replace('\n','')
-        #process(file_path)
-        just_insert_into_db(file_path)
-        file_path = fdp.readline()
-    fdp.close()
+#if len(argv) < 2:
+#    print("Give the file name to process")
+#else:
+#    fdp = open(argv[1])
+#    file_path = fdp.readline()
+for fp in GPA_Config.filestoproc:
+    just_insert_into_db(fp)
+    #while len(file_path) > 0:
+    #    file_path = file_path.replace('\n','')
+    #    #process(file_path)
+    #    just_insert_into_db(file_path)
+    #    file_path = fdp.readline()
+    #fdp.close()
 '''
+
 #Step 2: run SQL to consolidate sales in daily_sales table
+'''
+insert into daily_sales (storeid, date, amount)
+select storeid, date, sum(amount) from (
+select distinct storeid, ticketid, date, amount
+from trans_file
+where storeid = '0608')
+group by storeid, date;
+'''
 
 #Step 3: export sales
-#sales_exp(2013)
+#sales_exp(2015,"and storeid in ('1337', '1350', '1359') and date > '2015-05-18'")
 
 #Step 4: eun SQL to consolidate items in daily_items table
-
+'''
+insert into daily_items (storeid, date, time_incr, items)
+select storeid, date, time_incr, sum(items)
+from trans_file
+where storeid in ('1337', '1350', '1359', '1669', '0608')
+and date like '2013%'
+group by storeid, date, time_incr;
+'''
 #Step 5: export Items
-#items_exp(2013)
+#items_exp(2015,"and storeid in ('1337', '1350', '1359') ", "and date > '2015-05-18' ")
 
 #Step 6: count transaction by type by 15 min increments
-#count_transactions(2013)
+#count_transactions(2015, "and date > '2015-05-18' ")
 
 #Step7: export transaction by type by 15 min increments
-trxs_exp(2013)
+#trxs_exp("date > '2015-05-18' ")
+#trxs_exp2("date > '2015-05-18' ")
+
+#Step8: count items for mercearia
+'''
+insert into daily_mecearia (storeid, date, items)
+select storeid, date, sum(items)
+from trans_file
+where storeid in ('1337', '1350', '1359', '1669', '0608')
+and date like '2015%'
+and merecaria = 1
+group by storeid, date, time_incr
+'''
+#Step 9: export mercearia
+#mercearia_exp("date > '2015-05-18' ")
+
+#Step 10: calc sales
+'''
+insert into daily_cash (storeid, date, time_incr, cash_amt)
+select storeid, date, time_incr, sum(amount)
+from
+(select distinct storeid, date, time_incr, ticketid, amount
+from trans_file
+where trans_type = 'Transacao Dinheiro'
+and date > '2015-05-18'
+)
+group by storeid, date, time_incr;
+'''
+#Step 11: export Dinheiro Ventas
+#dinheiro_exp("date > '2015-05-18' ")
