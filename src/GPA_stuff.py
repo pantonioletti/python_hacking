@@ -619,7 +619,7 @@ def load_data_from_file():
 
             params.append((storeid, ticket, items_qty, date.strftime("%Y-%m-%d"),trans_type, is_mercearia, tkt_amt, time_incr.strftime("%H:%M:%S")))
             count += 1
-            if(count>=500):
+            if(count>=5000):
                 cur.executemany(stmt,params)
                 conn.commit()
                 count = 0
@@ -918,7 +918,7 @@ def count_transactions(year, date_filter):
     conn.close()
 
 
-def sales_exp(year, filter):
+def sales_exp(year, filter, of):
 
     sel_stmt = "select storeid, date_format(date,'%Y-%m-%dT00:00:00'), amount from daily_sales where date like '" + year.__str__() + "%' " + filter + " order by storeid asc, date asc"
     conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
@@ -935,23 +935,27 @@ def sales_exp(year, filter):
             stores[sale[0]].append(sale)
 
         sales = cur.fetchmany(1000)
-    print('<RadiantDocument CreationSource="WFM RedPrairie">')
-    print('<DataSet name="Generic Import" source="Actual" freq="Day">')
+
+    fd = open(of, mode='w', encoding='utf-8')
+
+    fd.write('<RadiantDocument CreationSource="WFM RedPrairie">')
+    fd.write('<DataSet name="Generic Import" source="Actual" freq="Day">')
     for st in stores.keys():
-        print('<Dimension ref_name="bu_code" value="' + st.__str__() + '">')
-        print('<Metric ref_name="Total Store Sales">')
+        fd.write('<Dimension ref_name="bu_code" value="' + st.__str__() + '">')
+        fd.write('<Metric ref_name="Vendas">')
         for ds in stores[st]:
             d = ds[1]
             v = ds[2]
-            print('<Data date="{0}" value="{1:.2f}"/>'.format(d,v))
-        print('</Metric>')
-        print('</Dimension>')
+            fd.write('<Data date="{0}" value="{1:.2f}"/>'.format(d,v))
+        fd.write('</Metric>')
+        fd.write('</Dimension>')
 
-    print('</DataSet>')
-    print('</RadiantDocument>')
+    fd.write('</DataSet>')
+    fd.write('</RadiantDocument>')
     conn.close()
+    fd.close()
 
-def mercearia_exp(date_filter):
+def mercearia_exp(date_filter, of):
     #Mercearia Itens
     sel_stmt = "select storeid, date_format(date,'%Y-%m-%dT00:00:00'), items from daily_mercearia where " + date_filter + " order by storeid asc, date asc"
     #conn = sqlite3.connect(DB_FILE)
@@ -968,25 +972,31 @@ def mercearia_exp(date_filter):
             stores[m[0]].append(m)
 
         mecearia = cur.fetchmany(1000)
-    print('<RadiantDocument CreationSource="WFM RedPrairie">')
-    print('<DataSet name="Generic Import" source="Actual" freq="Day">')
+
+    fd = open(of, mode='w', encoding='utf-8')
+
+    fd.write('<RadiantDocument CreationSource="WFM RedPrairie">')
+    fd.write('<DataSet name="Generic Import" source="Actual" freq="Day">')
     for st in stores.keys():
-        print('<Dimension ref_name="bu_code" value="' + st.__str__() + '">')
-        print('<Metric ref_name="Mercearia Itens">')
+        fd.write('<Dimension ref_name="bu_code" value="' + st.__str__() + '">')
+        fd.write('<Metric ref_name="Mercearia Itens">')
         for ds in stores[st]:
             d = ds[1]
             v = ds[2]
-            print('<Data date="{0}" value="{1:.2f}"/>'.format(d,v))
-        print('</Metric>')
-        print('</Dimension>')
+            fd.write('<Data date="{0}" value="{1:.2f}"/>'.format(d,v))
+        fd.write('</Metric>')
+        fd.write('</Dimension>')
 
-    print('</DataSet>')
-    print('</RadiantDocument>')
+    fd.write('</DataSet>')
+    fd.write('</RadiantDocument>')
     conn.close()
+    fd.close()
 
-def items_exp(year, str_filter, date_filter):
-    print ('<RadiantDocument CreationSource="WFM RedPrairie">')
-    print('<DataSet name="Generic Import" source="Actual" freq="QuarterHour">')
+def items_exp(year, str_filter, date_filter, of):
+
+    fd = open(of, mode='w', encoding='utf-8')
+    fd.write('<RadiantDocument CreationSource="WFM RedPrairie">')
+    fd.write('<DataSet name="Generic Import" source="Actual" freq="QuarterHour">')
 
     stmt = "select distinct storeid from daily_items where date like '" + year.__str__() +  "%' " + str_filter + " " + date_filter
     conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
@@ -1007,19 +1017,21 @@ def items_exp(year, str_filter, date_filter):
     for store in stores:
         cur.execute(stmt, store)
         data = cur.fetchall()
-        print('<Dimension ref_name="bu_code" value="' + store[0].__str__() + '">')
-        print('<Metric ref_name="Itens">')
+        fd.write('<Dimension ref_name="bu_code" value="' + store[0].__str__() + '">')
+        fd.write('<Metric ref_name="Itens">')
         for d in data:
-            print('<Data date="{0}" value="{1:.2f}"/>'.format(d[0],d[1]))
-        print('</Metric>')
-        print('</Dimension>')
-    print('</DataSet>')
-    print ('</RadiantDocument>')
+            fd.write('<Data date="{0}" value="{1:.2f}"/>'.format(d[0],d[1]))
+        fd.write('</Metric>')
+        fd.write('</Dimension>')
+    fd.write('</DataSet>')
+    fd.write('</RadiantDocument>')
     conn.close()
+    fd.close()
 
-def dinheiro_exp(date_filter):
-    print ('<RadiantDocument CreationSource="WFM RedPrairie">')
-    print('<DataSet name="Generic Import" source="Actual" freq="QuarterHour">')
+def dinheiro_exp(date_filter, of):
+    fd = open(of, mode='w', encoding='utf-8')
+    fd.write('<RadiantDocument CreationSource="WFM RedPrairie">')
+    fd.write('<DataSet name="Generic Import" source="Actual" freq="QuarterHour">')
 
     stmt = "select distinct storeid from daily_cash where " + date_filter
     conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
@@ -1037,19 +1049,20 @@ def dinheiro_exp(date_filter):
     for store in stores:
         cur.execute(stmt, store)
         data = cur.fetchall()
-        print('<Dimension ref_name="bu_code" value="' + store[0].__str__() + '">')
-        print('<Metric ref_name="Dinheiro Ventas">')
+        fd.write('<Dimension ref_name="bu_code" value="' + store[0].__str__() + '">')
+        fd.write('<Metric ref_name="Dinheiro Vendas">')
         for d in data:
-            print('<Data date="{0}" value="{1:.2f}"/>'.format(d[0],d[1]))
-        print('</Metric>')
-        print('</Dimension>')
-    print('</DataSet>')
-    print ('</RadiantDocument>')
+            fd.write('<Data date="{0}" value="{1:.2f}"/>'.format(d[0],d[1]))
+        fd.write('</Metric>')
+        fd.write('</Dimension>')
+    fd.write('</DataSet>')
+    fd.write ('</RadiantDocument>')
     conn.close()
+    fd.close()
 
-def trxs_exp(date_filter):
+def trxs_exp(date_filter, of):
 
-    fd = open(GPA_Config.out_file, mode='w', encoding='utf-8')
+    fd = open(of, mode='w', encoding='utf-8')
     fd.write ('<?xml version="1.0" encoding="UTF-8"?>\n')
     fd.write ('<RadiantDocument CreationSource="WFM RedPrairie">\n')
     fd.write('<DataSet name="Generic Import" source="Actual" freq="QuarterHour">\n')
@@ -1198,123 +1211,159 @@ getcontext().rounding = ROUND_UP
 
 
 if GPA_Config.exec_cmd == 'sales':
-    sales_exp(2015,"and date > '2015-06-28'")
+    sales_exp(2014,"and date between '2014-01-01' and '2014-05-31'", GPA_Config.out_sales[0])
+    sales_exp(2014,"and date between '2014-06-01' and '2014-08-31'",GPA_Config.out_sales[1])
+    sales_exp(2014,"and date between '2014-09-01' and '2014-12-31'",GPA_Config.out_sales[2])
+    sales_exp(2015,"and date between '2015-01-01' and '2015-03-31'",GPA_Config.out_sales[3])
+    sales_exp(2015,"and date between '2015-04-01' and '2015-06-30'",GPA_Config.out_sales[4])
+    sales_exp(2015,"and date between '2015-07-01' and '2015-08-31'",GPA_Config.out_sales[5])
+    #sales_exp(2014,"and date between '2014-01-01' and '2014-05-31'",GPA_Config.out_sales[6])
 elif GPA_Config.exec_cmd == 'file_import':
     load_data_from_file()
 elif GPA_Config.exec_cmd == 'items':
-    items_exp(2015,"and storeid in ('1337', '1350', '1359','1669', '0608') ", "and date > '2015-06-21' ")
+    items_exp(2014,"and storeid = '1350' ", "and date between '2014-01-01' and '2014-05-31' ",GPA_Config.out_items[0])
+    items_exp(2014,"and storeid = '1350' ", "and date between '2014-06-01' and '2014-08-31' ",GPA_Config.out_items[1])
+    items_exp(2014,"and storeid = '1350' ", "and date between '2014-09-01' and '2014-12-31' ",GPA_Config.out_items[2])
+    items_exp(2015,"and storeid = '1350' ", "and date between '2015-01-01' and '2015-03-31' ",GPA_Config.out_items[3])
+    items_exp(2015,"and storeid = '1350' ", "and date between '2015-04-01' and '2015-06-30' ",GPA_Config.out_items[4])
+    items_exp(2015,"and storeid = '1350' ", "and date between '2015-07-01' and '2015-08-31' ",GPA_Config.out_items[5])
 elif GPA_Config.exec_cmd == 'count_trxs':
-    count_trxs(2015, "and date > '2015-06-06' ")
+    print("     ----> Processing March 2014")
+    count_trxs(2014, " and date between '2014-03-01' and '2014-03-31' and storeid = '1359' ")
+    print("     ----> Processing April 2014")
+    count_trxs(2014, " and date between '2014-04-01' and '2014-04-30' and storeid = '1359' ")
+    print("     ----> Processing May 2014")
+    count_trxs(2014, " and date between '2014-05-01' and '2014-05-31' and storeid = '1359' ")
 elif GPA_Config.exec_cmd == 'trx_det':
-    trxs_exp("date > '2015-06-28' ")
+    trxs_exp(" date between '2014-01-01' and '2014-05-31' and storeid = '1350' ", GPA_Config.out_trxs[0])
+    trxs_exp(" date between '2014-06-01' and '2014-08-31' and storeid = '1350' ", GPA_Config.out_trxs[1])
+    trxs_exp(" date between '2014-09-01' and '2014-12-31' and storeid = '1350' ", GPA_Config.out_trxs[2])
+    trxs_exp(" date between '2015-01-01' and '2015-03-31' and storeid = '1350' ", GPA_Config.out_trxs[3])
+    trxs_exp(" date between '2015-04-01' and '2015-06-30' and storeid = '1350' ", GPA_Config.out_trxs[4])
+    trxs_exp(" date between '2015-07-01' and '2015-08-31' and storeid = '1350' ", GPA_Config.out_trxs[5])
+    #trxs_exp(" date between '2014-01-01' and '2014-05-31' and storeid = '1337' ", GPA_Config.out_trxs[6])
 elif GPA_Config.exec_cmd == 'trx_tot':
-    trxs_exp2("date > '2015-06-06' ")
+    trxs_exp2("date > '2015-06-28' ")
 elif GPA_Config.exec_cmd == 'mercearia':
-    mercearia_exp("date > '2015-06-06' ")
+    mercearia_exp("date > '2014-01-01' ", GPA_Config.out_file)
 elif GPA_Config.exec_cmd == 'cash':
-    dinheiro_exp("date > '2015-06-06' ")
+    dinheiro_exp("date between '2014-01-01' and '2014-05-31' and storeid = '1350' ", GPA_Config.out_cash[0])
+    dinheiro_exp("date between '2014-06-01' and '2014-08-31' and storeid = '1350' ", GPA_Config.out_cash[1])
+    dinheiro_exp("date between '2014-09-01' and '2014-12-31' and storeid = '1350' ", GPA_Config.out_cash[2])
+    dinheiro_exp("date between '2015-01-01' and '2015-03-31' and storeid = '1350' ", GPA_Config.out_cash[3])
+    dinheiro_exp("date between '2015-04-01' and '2015-06-30' and storeid = '1350' ", GPA_Config.out_cash[4])
+    dinheiro_exp("date between '2015-07-01' and '2015-08-31' and storeid = '1350' ", GPA_Config.out_cash[5])
 elif GPA_Config.exec_cmd == 'calc_sales':
-    calc_sales("date > '2015-06-28' and storeid in ('0608','1669') ")
+    calc_sales("date between '2014-01-01' and '2014-05-31' and storeid = '1337' ")
+    calc_sales("date between '2014-06-01' and '2014-08-31' and storeid = '1337' ")
+    calc_sales("date between '2014-09-01' and '2014-12-31' and storeid = '1337' ")
+    calc_sales("date between '2015-01-01' and '2015-03-31' and storeid = '1337' ")
+    calc_sales("date between '2015-04-01' and '2015-06-30' and storeid = '1337' ")
+    calc_sales("date between '2015-07-01' and '2015-08-31' and storeid = '1337' ")
 elif GPA_Config.exec_cmd == 'calc_items':
-    calc_items(" date > '2015-06-28'")
+    calc_items(" date between '2014-01-01' and '2014-05-31' and storeid = '1337' ")
+    calc_items(" date between '2014-06-01' and '2014-08-31' and storeid = '1337' ")
+    calc_items(" date between '2014-09-01' and '2014-12-31' and storeid = '1337' ")
+    calc_items(" date between '2015-01-01' and '2015-03-31' and storeid = '1337' ")
+    calc_items(" date between '2015-04-01' and '2015-06-30' and storeid = '1337' ")
+    calc_items(" date between '2015-07-01' and '2015-08-31' and storeid = '1337' ")
     #storeid in ('1337', '1350', '1359', '1669', '0608') " \
 elif GPA_Config.exec_cmd == 'calc_mercearia':
-    calc_mercearia(" date > '2015-06-28'")
+    calc_mercearia(" date > '2014-01-01'")
     #storeid in ('1337', '1350', '1359', '1669', '0608') " \
     #       "and date >= '2015-05-19'
 elif GPA_Config.exec_cmd == 'calc_cash':
-    calc_mercearia(" date > '2015-06-28'")
+    calc_cash(" date > '2014-01-01' and storeid = '1337' ")
+elif GPA_Config.exec_cmd == 'calc_all':
+    print("Calculating SALES")
+    print("     ----> Processing March to May 2014")
+    calc_sales("date between '2014-01-01' and '2014-05-31' and storeid = '1669' ")
+    print("     ----> Processing June to August 2014")
+    calc_sales("date between '2014-06-01' and '2014-08-31' and storeid = '1669' ")
+    print("     ----> Processing September to December 2014")
+    calc_sales("date between '2014-09-01' and '2014-12-31' and storeid = '1669' ")
+    print("     ----> Processing January to March 2015")
+    calc_sales("date between '2015-01-01' and '2015-03-31' and storeid = '1669' ")
+    print("     ----> Processing April to June 2015")
+    calc_sales("date between '2015-04-01' and '2015-06-30' and storeid = '1669' ")
+    print("     ----> Processing July to August 2015")
+    calc_sales("date between '2015-07-01' and '2015-08-31' and storeid = '1669' ")
+    print("End calculationg SALES")
+
+    print("Calculating ITEMS")
+    print("     ----> Processing March to May 2014")
+    calc_items(" date between '2014-01-01' and '2014-05-31' and storeid = '1669' ")
+    print("     ----> Processing June to August 2014")
+    calc_items(" date between '2014-06-01' and '2014-08-31' and storeid = '1669' ")
+    print("     ----> Processing September to December 2014")
+    calc_items(" date between '2014-09-01' and '2014-12-31' and storeid = '1669' ")
+    print("     ----> Processing January to March 2015")
+    calc_items(" date between '2015-01-01' and '2015-03-31' and storeid = '1669' ")
+    print("     ----> Processing April to June 2015")
+    calc_items(" date between '2015-04-01' and '2015-06-30' and storeid = '1669' ")
+    print("     ----> Processing July to August 2015")
+    calc_items(" date between '2015-07-01' and '2015-08-31' and storeid = '1669' ")
+    print("End calculationg ITEMS")
+
+    print("Calculating MERCEARIA")
+    calc_mercearia(" date > '2014-01-01'")
+    print("End calculationg MERCEARIA")
+
+    print("Calculating CASH")
+    calc_cash(" date > '2014-01-01' and storeid = '1669' ")
+    print("End calculationg CASH")
+
+    print("Calculating TRANSACTIONS")
+    print("     ----> Processing March to May 2014")
+    count_trxs(2014, " and date between '2014-01-01' and '2014-05-31' and storeid = '1669' ")
+    print("     ----> Processing June to August 2014")
+    count_trxs(2014, " and date between '2014-06-01' and '2014-08-31' and storeid = '1669' ")
+
+    print("     ----> Processing September 2014")
+    count_trxs(2014, " and date between '2014-09-01' and '2014-09-30' and storeid = '1669' ")
+    print("     ----> Processing October 2014")
+    count_trxs(2014, " and date between '2014-10-01' and '2014-10-31' and storeid = '1669' ")
+    print("     ----> Processing November 2014")
+    count_trxs(2014, " and date between '2014-11-01' and '2014-11-30' and storeid = '1669' ")
+    print("     ----> Processing December 2014")
+    count_trxs(2014, " and date between '2014-12-01' and '2014-12-31' and storeid = '1669' ")
+    print("     ----> Processing January to March 2015")
+    count_trxs(2015, " and date between '2015-01-01' and '2015-03-31' and storeid = '1669' ")
+    print("     ----> Processing April to June 2015")
+    count_trxs(2015, " and date between '2015-04-01' and '2015-06-30' and storeid = '1669' ")
+    print("     ----> Processing July to August 2015")
+    count_trxs(2015, " and date between '2015-07-01' and '2015-08-31' and storeid = '1669' ")
+    print("End calculationg TRANSACTIONS")
+elif GPA_Config.exec_cmd == 'exp_all':
+    sales_exp(2014,"and date between '2014-01-01' and '2014-05-31'", GPA_Config.out_sales[0])
+    sales_exp(2014,"and date between '2014-06-01' and '2014-08-31'",GPA_Config.out_sales[1])
+    sales_exp(2014,"and date between '2014-09-01' and '2014-12-31'",GPA_Config.out_sales[2])
+    sales_exp(2015,"and date between '2015-01-01' and '2015-03-31'",GPA_Config.out_sales[3])
+    sales_exp(2015,"and date between '2015-04-01' and '2015-06-30'",GPA_Config.out_sales[4])
+    sales_exp(2015,"and date between '2015-07-01' and '2015-08-31'",GPA_Config.out_sales[5])
+
+    items_exp(2014,"and storeid = '1669' ", "and date between '2014-01-01' and '2014-05-31' ",GPA_Config.out_items[0])
+    items_exp(2014,"and storeid = '1669' ", "and date between '2014-06-01' and '2014-08-31' ",GPA_Config.out_items[1])
+    items_exp(2014,"and storeid = '1669' ", "and date between '2014-09-01' and '2014-12-31' ",GPA_Config.out_items[2])
+    items_exp(2015,"and storeid = '1669' ", "and date between '2015-01-01' and '2015-03-31' ",GPA_Config.out_items[3])
+    items_exp(2015,"and storeid = '1669' ", "and date between '2015-04-01' and '2015-06-30' ",GPA_Config.out_items[4])
+    items_exp(2015,"and storeid = '1669' ", "and date between '2015-07-01' and '2015-08-31' ",GPA_Config.out_items[5])
+
+    trxs_exp(" date between '2014-01-01' and '2014-05-31' and storeid = '1669' ", GPA_Config.out_trxs[0])
+    trxs_exp(" date between '2014-06-01' and '2014-08-31' and storeid = '1669' ", GPA_Config.out_trxs[1])
+    trxs_exp(" date between '2014-09-01' and '2014-12-31' and storeid = '1669' ", GPA_Config.out_trxs[2])
+    trxs_exp(" date between '2015-01-01' and '2015-03-31' and storeid = '1669' ", GPA_Config.out_trxs[3])
+    trxs_exp(" date between '2015-04-01' and '2015-06-30' and storeid = '1669' ", GPA_Config.out_trxs[4])
+    trxs_exp(" date between '2015-07-01' and '2015-08-31' and storeid = '1669' ", GPA_Config.out_trxs[5])
+
+    mercearia_exp("date > '2014-01-01' ", GPA_Config.out_file)
+
+    dinheiro_exp("date between '2014-01-01' and '2014-05-31' and storeid = '1669' ", GPA_Config.out_cash[0])
+    dinheiro_exp("date between '2014-06-01' and '2014-08-31' and storeid = '1669' ", GPA_Config.out_cash[1])
+    dinheiro_exp("date between '2014-09-01' and '2014-12-31' and storeid = '1669' ", GPA_Config.out_cash[2])
+    dinheiro_exp("date between '2015-01-01' and '2015-03-31' and storeid = '1669' ", GPA_Config.out_cash[3])
+    dinheiro_exp("date between '2015-04-01' and '2015-06-30' and storeid = '1669' ", GPA_Config.out_cash[4])
+    dinheiro_exp("date between '2015-07-01' and '2015-08-31' and storeid = '1669' ", GPA_Config.out_cash[5])
+
+
 exit(1)
-
-
-
-#print(file)
-#insert_emp()
-#insert_stat()
-
-#emp_avail_exp()
-
-#Use it to split a file by an inside criteria
-#split_by_store(argv[1],argv[2])
-#exit(0)
-
-
-
-
-
-#Step 1 - load files
-'''
-#if len(argv) < 2:
-#    print("Give the file name to process")
-#else:
-#    fdp = open(argv[1])
-#    file_path = fdp.readline()
-for fp in GPA_Config.filestoproc:
-    just_insert_into_db(fp)
-    #while len(file_path) > 0:
-    #    file_path = file_path.replace('\n','')
-    #    #process(file_path)
-    #    just_insert_into_db(file_path)
-    #    file_path = fdp.readline()
-    #fdp.close()
-'''
-
-#Step 2: run SQL to consolidate sales in daily_sales table
-'''
-insert into daily_sales (storeid, date, amount)
-select storeid, date, sum(amount) from (
-select distinct storeid, ticketid, date, amount
-from trans_file
-where storeid = '0608')
-group by storeid, date;
-'''
-
-#Step 3: export sales
-#sales_exp(2015,"and storeid in ('1337', '1350', '1359') and date > '2015-05-18'")
-
-#Step 4: eun SQL to consolidate items in daily_items table
-'''
-insert into daily_items (storeid, date, time_incr, items)
-select storeid, date, time_incr, sum(items)
-from trans_file
-where storeid in ('1337', '1350', '1359', '1669', '0608')
-and date like '2013%'
-group by storeid, date, time_incr;
-'''
-#Step 5: export Items
-#items_exp(2015,"and storeid in ('1337', '1350', '1359') ", "and date > '2015-05-18' ")
-
-#Step 6: count transaction by type by 15 min increments
-#count_transactions(2015, "and date > '2015-05-18' ")
-
-#Step7: export transaction by type by 15 min increments
-#trxs_exp("date > '2015-05-18' ")
-#trxs_exp2("date > '2015-05-18' ")
-
-#Step8: count items for mercearia
-'''
-insert into daily_mecearia (storeid, date, items)
-select storeid, date, sum(items)
-from trans_file
-where storeid in ('1337', '1350', '1359', '1669', '0608')
-and date like '2015%'
-and merecaria = 1
-group by storeid, date, time_incr
-'''
-#Step 9: export mercearia
-#mercearia_exp("date > '2015-05-18' ")
-
-#Step 10: calc sales
-'''
-insert into daily_cash (storeid, date, time_incr, cash_amt)
-select storeid, date, time_incr, sum(amount)
-from
-(select distinct storeid, date, time_incr, ticketid, amount
-from trans_file
-where trans_type = 'Transacao Dinheiro'
-and date > '2015-05-18'
-)
-group by storeid, date, time_incr;
-'''
-#Step 11: export Dinheiro Ventas
-#dinheiro_exp("date > '2015-05-18' ")
