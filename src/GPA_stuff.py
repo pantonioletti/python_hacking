@@ -10,6 +10,7 @@ from sys import argv
 
 import mysql.connector
 import pymssql
+import _mssql
 import re
 import GPA_Config
 
@@ -588,8 +589,14 @@ def load_data_from_file():
     pattern = re.compile("|".join(rep.keys()))
 
     #conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
-    conn = pymssql.connect("localhost", "sa", "RedPrairie1", "GPA_TRXS")
+    conn = pymssql.connect(GPA_Config.mssql_conn_str['host'], \
+                          GPA_Config.mssql_conn_str['user'], \
+                          GPA_Config.mssql_conn_str['password'], \
+                          GPA_Config.mssql_conn_str['database'])
+    conn.autocommit(False)
     stmt = "insert into trans_file (storeid,ticketid,items,date,trans_type,mercearia,amount,time_incr) values (%s,%s,%s,%s,%s,%s,%s,%s)"
+    #stmt = "insert into trans_file (storeid,ticketid,items,date,trans_type,mercearia,amount,time_incr) "\
+    #        "values (%(storeid),%(ticketid),%(items),%(date),%(trans_type),%(mercearia),%(amount),%(time_incr))"
     params = list()
     cur = conn.cursor()
 
@@ -612,27 +619,36 @@ def load_data_from_file():
             items_qty = data[3]
             date = parsedate(data[4])
             trans_type = data[5]
-            if data[6] == 'MERCEARIA':
-                is_mercearia = 1
-            else:
-                is_mercearia = 0
+
+            #Cancelado
+            #Servico
+            #Divergencia
+            #Cobertura
+            is_mercearia = data[6]
+            #if data[6] == 'MERCEARIA':
+            #    is_mercearia = 1
+            #else:
+            #    is_mercearia = 0
             tkt_amt = data[8]
             time_incr = parsetime(data[9])
 
+            #params.append({'storeid':storeid, 'ticketid':ticket, 'items':items_qty, 'date':date.strftime("%Y-%m-%d"),'trans_type':trans_type, \
+            #               'mercearia':is_mercearia, 'amount':tkt_amt, 'time_incr':time_incr.strftime("%H:%M:%S")})
             params.append((storeid, ticket, items_qty, date.strftime("%Y-%m-%d"),trans_type, is_mercearia, tkt_amt, time_incr.strftime("%H:%M:%S")))
             count += 1
-            if(count>=5000):
+            if(count>=10000):
+                #conn.execute_non_query(stmt, params)
                 cur.executemany(stmt,params)
                 conn.commit()
                 count = 0
                 params = list()
-                #print("Total lines read: " + tot_reads.__str__())
+                print("Total lines wrote: " + tot_reads.__str__())
 
             line = fd.readline()
         if count > 0:
             cur.executemany(stmt,params)
             conn.commit()
-        print("Total lines read: " + tot_reads.__str__())
+        print("Total lines wrote: " + tot_reads.__str__())
         fd.close()
     conn.close()
 
@@ -812,7 +828,10 @@ def db_insert_transctions(data):
     if len(data)>0:
         #conn = sqlite3.connect(DB_FILE)
         #conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
-        conn = pymssql.connect("localhost", "sa", "RedPrairie1", "GPA_TRXS")
+        conn = _mssql.connect(server=GPA_Config.mssql_conn_str['server'], \
+                              user=GPA_Config.mssql_conn_str['user'], \
+                              password=GPA_Config.mssql_conn_str['password'], \
+                              database=GPA_Config.mssql_conn_str['database'])
         cur = conn.cursor()
         cur.executemany(ins_stmt,data)
         conn.commit()
@@ -826,7 +845,10 @@ def count_trxs(year, date_filter):
     date = None
 
     #conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
-    conn = pymssql.connect("localhost", "sa", "RedPrairie1", "GPA_TRXS")
+    conn = _mssql.connect(server=GPA_Config.mssql_conn_str['server'], \
+                          user=GPA_Config.mssql_conn_str['user'], \
+                          password=GPA_Config.mssql_conn_str['password'], \
+                          database=GPA_Config.mssql_conn_str['database'])
     cur = conn.cursor()
 
     # Gather all store/day pairs
@@ -899,7 +921,10 @@ def count_transactions(year, date_filter):
 
     #conn = sqlite3.connect(DB_FILE)
     #conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
-    conn = pymssql.connect("localhost", "sa", "RedPrairie1", "GPA_TRXS")
+    conn = _mssql.connect(server=GPA_Config.mssql_conn_str['server'], \
+                          user=GPA_Config.mssql_conn_str['user'], \
+                          password=GPA_Config.mssql_conn_str['password'], \
+                          database=GPA_Config.mssql_conn_str['database'])
     cur = conn.cursor()
     # Gather all store/day pairs
     cur.execute("select distinct storeid, date from trans_file where date like '" + year.__str__() + "%' " + date_filter)
@@ -959,7 +984,10 @@ def sales_exp(filter, of):
 
     sel_stmt = "select storeid, format(date,'yyyy-MM-ddT00:00:00'), amount from daily_sales where " + filter + " order by storeid asc, date asc"
     #conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
-    conn = pymssql.connect("localhost", "sa", "RedPrairie1", "GPA_TRXS")
+    conn = _mssql.connect(server=GPA_Config.mssql_conn_str['server'], \
+                          user=GPA_Config.mssql_conn_str['user'], \
+                          password=GPA_Config.mssql_conn_str['password'], \
+                          database=GPA_Config.mssql_conn_str['database'])
     #conn = sqlite3.connect(DB_FILE)
     cur = conn.cursor()
     cur.execute(sel_stmt)
@@ -1000,7 +1028,10 @@ def mercearia_exp(date_filter, of):
     sel_stmt = "select storeid, format(date,'yyyy-MM-ddT00:00:00'), items from daily_mercearia where " + date_filter + " order by storeid asc, date asc"
     #conn = sqlite3.connect(DB_FILE)
     #conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
-    conn = pymssql.connect("localhost", "sa", "RedPrairie1", "GPA_TRXS")
+    conn = _mssql.connect(server=GPA_Config.mssql_conn_str['server'], \
+                          user=GPA_Config.mssql_conn_str['user'], \
+                          password=GPA_Config.mssql_conn_str['password'], \
+                          database=GPA_Config.mssql_conn_str['database'])
     cur = conn.cursor()
     cur.execute(sel_stmt)
     s = str()
@@ -1043,7 +1074,10 @@ def items_exp(str_filter, date_filter, of):
 
     stmt = "select distinct storeid from daily_items where " + str_filter + " " + date_filter
     #conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
-    conn = pymssql.connect("localhost", "sa", "RedPrairie1", "GPA_TRXS")
+    conn = _mssql.connect(server=GPA_Config.mssql_conn_str['server'], \
+                          user=GPA_Config.mssql_conn_str['user'], \
+                          password=GPA_Config.mssql_conn_str['password'], \
+                          database=GPA_Config.mssql_conn_str['database'])
     #sqlite3.connect(DB_FILE)
     cur = conn.cursor()
     cur.execute(stmt)
@@ -1054,8 +1088,8 @@ def items_exp(str_filter, date_filter, of):
             "where storeid = %s "
     if len(date_filter) > 0:
         stmt = stmt + date_filter
-    else:
-        stmt = stmt + "and date like '" + year.__str__() + "%' "
+    #else:
+    #    stmt = stmt + "and date like '" + year.__str__() + "%' "
     stmt += "order by dt"
 
     for store in stores:
@@ -1081,7 +1115,10 @@ def dinheiro_exp(date_filter, of):
 
     stmt = "select distinct storeid from daily_cash where " + date_filter
     #conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
-    conn = pymssql.connect("localhost", "sa", "RedPrairie1", "GPA_TRXS")
+    conn = _mssql.connect(server=GPA_Config.mssql_conn_str['server'], \
+                          user=GPA_Config.mssql_conn_str['user'], \
+                          password=GPA_Config.mssql_conn_str['password'], \
+                          database=GPA_Config.mssql_conn_str['database'])
     #conn = sqlite3.connect(DB_FILE)
     cur = conn.cursor()
     cur.execute(stmt)
@@ -1117,7 +1154,10 @@ def trxs_exp(date_filter, of):
 
     stmt = "select distinct storeid from daily_transactions where " + date_filter
     #conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
-    conn = pymssql.connect("localhost", "sa", "RedPrairie1", "GPA_TRXS")
+    conn = _mssql.connect(server=GPA_Config.mssql_conn_str['server'], \
+                          user=GPA_Config.mssql_conn_str['user'], \
+                          password=GPA_Config.mssql_conn_str['password'], \
+                          database=GPA_Config.mssql_conn_str['database'])
     #conn = sqlite3.connect(DB_FILE)
     cur = conn.cursor()
     cur.execute(stmt)
@@ -1164,7 +1204,10 @@ def trxs_exp2(date_filter):
     stmt = "select distinct storeid from daily_transactions where " + date_filter
     #conn = sqlite3.connect(DB_FILE)
     #conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
-    conn = pymssql.connect("localhost", "sa", "RedPrairie1", "GPA_TRXS")
+    conn = _mssql.connect(server=GPA_Config.mssql_conn_str['server'], \
+                          user=GPA_Config.mssql_conn_str['user'], \
+                          password=GPA_Config.mssql_conn_str['password'], \
+                          database=GPA_Config.mssql_conn_str['database'])
     cur = conn.cursor()
     cur.execute(stmt)
     stores = cur.fetchall()
@@ -1200,7 +1243,10 @@ def calc_sales(date_filter):
            "group by tf.storeid, tf.date"
 
     #conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
-    conn = pymssql.connect("localhost", "sa", "RedPrairie1", "GPA_TRXS")
+    conn = _mssql.connect(server=GPA_Config.mssql_conn_str['server'], \
+                          user=GPA_Config.mssql_conn_str['user'], \
+                          password=GPA_Config.mssql_conn_str['password'], \
+                          database=GPA_Config.mssql_conn_str['database'])
     #conn = sqlite3.connect(DB_FILE)
     cur = conn.cursor()
     cur.execute(stmt)
@@ -1216,7 +1262,10 @@ def calc_items(filter):
            "group by storeid, date, time_incr"
 
     #conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
-    conn = pymssql.connect("localhost", "sa", "RedPrairie1", "GPA_TRXS")
+    conn = _mssql.connect(server=GPA_Config.mssql_conn_str['server'], \
+                          user=GPA_Config.mssql_conn_str['user'], \
+                          password=GPA_Config.mssql_conn_str['password'], \
+                          database=GPA_Config.mssql_conn_str['database'])
     #conn = sqlite3.connect(DB_FILE)
     cur = conn.cursor()
     cur.execute(stmt)
@@ -1229,12 +1278,15 @@ def calc_mercearia(filter):
            "select storeid, date, sum(items) " \
            "from trans_file " \
            "where "+filter+" " \
-           "and mercearia = '1' " \
+           "and mercearia = 'MERCEARIA' " \
            "group by storeid, date"
 
 
     #conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
-    conn = pymssql.connect("localhost", "sa", "RedPrairie1", "GPA_TRXS")
+    conn = _mssql.connect(server=GPA_Config.mssql_conn_str['server'], \
+                          user=GPA_Config.mssql_conn_str['user'], \
+                          password=GPA_Config.mssql_conn_str['password'], \
+                          database=GPA_Config.mssql_conn_str['database'])
     #conn = sqlite3.connect(DB_FILE)
     cur = conn.cursor()
     cur.execute(stmt)
@@ -1253,7 +1305,10 @@ def calc_cash(filter):
 
 
     #conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
-    conn = pymssql.connect("localhost", "sa", "RedPrairie1", "GPA_TRXS")
+    conn = _mssql.connect(server=GPA_Config.mssql_conn_str['server'], \
+                          user=GPA_Config.mssql_conn_str['user'], \
+                          password=GPA_Config.mssql_conn_str['password'], \
+                          database=GPA_Config.mssql_conn_str['database'])
     #conn = sqlite3.connect(DB_FILE)
     cur = conn.cursor()
     cur.execute(stmt)
@@ -1265,7 +1320,10 @@ def get_date_range(storeid):
     stmt = "select min(date) from trans_file where storeid = '" + storeid + "'"
     #conn = sqlite3.connect(DB_FILE)
     #conn = mysql.connector.connect(**GPA_Config.mysql_conn_str)
-    conn = pymssql.connect("localhost", "sa", "RedPrairie1", "GPA_TRXS")
+    conn = _mssql.connect(server=GPA_Config.mssql_conn_str['server'], \
+                          user=GPA_Config.mssql_conn_str['user'], \
+                          password=GPA_Config.mssql_conn_str['password'], \
+                          database=GPA_Config.mssql_conn_str['database'])
     cur = conn.cursor()
     cur.execute(stmt)
     min_date = cur.fetchone()
@@ -1288,7 +1346,7 @@ if cmd == 'load_file':
         exit()
     for i in range(2,len(argv)):
         GPA_Config.files2proc = (argv[i],)
-        load_data_from_file2()
+        load_data_from_file()
 elif cmd == 'proc_all':
     if len(argv) != 6:
         exit()
