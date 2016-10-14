@@ -1,4 +1,4 @@
-import dbaccess.common
+﻿import dbaccess.common
 
 def readusitem(params):
     conn = dbaccess.common.Connection(dbaccess.common.Constants.CXORA,params[0],params[1],params[2])
@@ -19,7 +19,7 @@ def readusitem(params):
                 str = ""
                 for idx in range ((start+7),end):
                     str = str + xx[idx]
-                print str, '\n'
+                print (str, '\n')
         row = cur.fetchone()
     cur.close()
     conn.close()

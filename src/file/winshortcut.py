@@ -1,4 +1,4 @@
-import array
+ï»¿import array
 WORD=2
 HEXB=16
 
@@ -11,7 +11,7 @@ Estructura de archivo *.lnk (acceso directo)
 +------+-----------+-------------------------------+
 |Offset| Size/Type |          Contents             |
 +------+-----------+-------------------------------+
-|0h    | 1 dword   | Always 0000004Ch ‘L’          |
+|0h    | 1 dword   | Always 0000004Ch ï¿½Lï¿½          |
 +------+-----------+-------------------------------+
 |4h    |16 bytes   | GUID of shortcut files        |
 +------+-----------+-------------------------------+
@@ -122,10 +122,10 @@ class LnkReadError(Exception):
     
 def printarraycontent(arr, astype, startat, yn):
     if (yn):
-        print 'size : ', len(arr)
+        print ('size : ', len(arr))
     s ='%(v)02' + astype + ''
     for i in (len(arr)-1, startat):
-        print s % {'v':arr[i]}
+        print (s % {'v':arr[i]})
 def readshortcut(filestr):
     try:
         fd = open(filestr, 'rb')
@@ -137,8 +137,8 @@ def readshortcut(filestr):
         buf.fromfile(fd, HEXB)
 
 
-
-|0h    | 1 dword   | Always 0000004Ch ‘L’          |
+        '''
+|0h    | 1 dword   | Always 0000004Ch ï¿½Lï¿½          |
 +------+-----------+-------------------------------+
 |4h    |16 bytes   | GUID of shortcut files        |
 +------+-----------+-------------------------------+
@@ -162,6 +162,7 @@ def readshortcut(filestr):
 +------+-----------+-------------------------------+
 |44h   | 2 dwords  | Unknown, always zero          |
 +------+-----------+-------------------------------+
+'''
         #printarraycontent(buf, 'X', DWORD, True)
         
         
@@ -173,9 +174,9 @@ def readshortcut(filestr):
         #print 'Everything is fine'
         fd.close()
     except IOError:
-        print "File not found"
+        print ("File not found")
     except EOFError:
-        print ERR_LEN
+        print (ERR_LEN)
     except LnkReadError, e:
-        print e.__str__()
+        print (e.__str__())
     return

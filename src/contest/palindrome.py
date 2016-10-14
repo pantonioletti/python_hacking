@@ -1,4 +1,4 @@
-import StirngIO
+﻿import StirngIO
 
 class parser:
     def init(self):
@@ -18,6 +18,6 @@ class parser:
             fd.close()
         except IOError:
             print( "File ", input, " not found")
-    def parse(self):
-        for i in range()
+    #def parse(self):
+    #    for i in range()
         
